@@ -6,58 +6,34 @@
 class LearningFrameWork
 {
 private:
+
+	int layer_12_hidden_node;
+	int layer_23_hidden_node;
+
 	float learning_rate;
 	float lambda;
 	float momentum;
 	int epoch;
 
 	std::string input_dir;
-	
+	std::string data_structure;
+
 	std::string weight_dir_name;
 	std::string weight_dir_name23;
 	std::string weight_dir_nameall;
 	
-	data_manager input_data;
-	data_manager input_data_test;
-	
-	procrustes_parameter *train_proc;
-	procrustes_parameter *test_proc;
-
-	pca_parameter *trained_pca_parameter;
-
-	network_parameter3 *netp1;
-	network_parameter3 *netp2;
-	network_parameter5 *netpa;
-
-	std::map<std::string, std::string> learn_map;
 
 	learn_info *info;
 
-	int layer_12_hidden_node;
-	int layer_23_hidden_node;
+	std::map<std::string, std::string> learn_map;
 
-	std::string data_structure;
+	LoadBase* m_loader;
 
 	clock_t start_time;
 
-	//aam
-
-	data_manager data_shape;
-	data_manager data_texture;
-
-	network_parameter* shape_model;
-	network_parameter* texture_model;
-
-	procrustes_parameter_shape *shape_proc_train;
-	procrustes_parameter_texture *texture_proc_train;
-	procrustes_parameter_shape *shape_proc_test;
-	procrustes_parameter_texture *texture_proc_test;
-
 public:
 	LearningFrameWork(int argc , char* argv[])
-		: netp1(0)
-		, netp2(0)
-		, netpa(0)
+		: m_loader(NULL)
 	{
 		if( argc < 15 )
 		{
@@ -114,201 +90,47 @@ public:
 
 		if( data_structure == "shape" )
 		{
-			input_data = load_data_shape( input_dir + "//train.dat" );
-			if( !input_data.is_open() )
-			{
-				std::cout << "train.datがありません" << std::endl;
-				exit(1);
-			}
-
-			input_data_test = load_data_shape( input_dir + "//test.dat" );
-			if( !input_data_test.is_open() )
-			{
-				std::cout << "test.datがありません" << std::endl;
-				exit(1);
-			}
-
-			//トレーニング情報
-			train_proc = new procrustes_parameter_shape();
-			train_proc->load_data( input_dir + "//train.dat.train.dat");
-
-			test_proc = new procrustes_parameter_shape();
-			test_proc->load_data( input_dir + "//test.dat.train.dat");
+			m_loader = new LoadShape();
 		}
 		else if( data_structure == "texture" )
 		{
-			input_data = load_data_texture( input_dir + "//train.dat" );
-			if( !input_data.is_open() )
-			{
-				std::cout << "train.datがありません" << std::endl;
-				exit(1);
-			}
-
-			input_data_test = load_data_texture( input_dir + "//test.dat" );
-			if( !input_data_test.is_open() )
-			{
-				std::cout << "test.datがありません" << std::endl;
-				exit(1);
-			}
-
-			//トレーニング情報
-			train_proc = new procrustes_parameter_texture();
-			train_proc->load_data( input_dir + "//train.dat.train.dat");
-
-			test_proc = new procrustes_parameter_texture();
-			test_proc->load_data( input_dir + "//test.dat.train.dat");
+			m_loader = new LoadTexture();
 		}
 		else if( data_structure == "aam" )
 		{
-			int shape_count = 0;
-
-			input_data = load_data_aam( input_dir + "//train" , shape_count );
-			if( !input_data.is_open() )
-			{
-				std::cout << "train.datがありません" << std::endl;
-				exit(1);
-			}
-
-			input_data_test = load_data_aam( input_dir + "//test" , shape_count );
-			if( !input_data_test.is_open() )
-			{
-				std::cout << "test.datがありません" << std::endl;
-				exit(1);
-			}
-
-			data_shape = load_data_shape(input_dir + "//train.dat");
-			data_texture = load_data_texture(input_dir + "//train.dat");
-			data_shape.normalize(1);
-			data_texture.normalize(1);
-
-			shape_proc_train = new procrustes_parameter_shape(input_dir + "//train.dat.train.dat");
-			texture_proc_train = new procrustes_parameter_texture(input_dir + "//train.dat.train.dat");
-
-			shape_proc_test = new procrustes_parameter_shape(input_dir + "//test.dat.train.dat");
-			texture_proc_test = new procrustes_parameter_texture(input_dir + "//test.dat.train.dat");
-
-			shape_model = get_network_parameter("shape_model", learn_map, shape_proc_train->get_origin_shape().get_input_node() );
-			texture_model = get_network_parameter("texture_model", learn_map, texture_proc_train->get_origin_texture().get_input_node() );
-
+			m_loader = new LoadAAM();
 		}
 
-		//PCA情報
-//		trained_pca_parameter = new pca_parameter();
-//		trained_pca_parameter->load_pca_parameter( "Texture.eigen" , "Texture.mean" );
+		m_loader->load_data(input_dir, learn_map);
 
 		//normalize
-		input_data.normalize( 1 );
-		input_data_test.normalize( 1 , input_data.get_normal_param() );
+		m_loader->get_input_data()->normalize( 1 );
+		m_loader->get_input_data_test()->normalize(1, m_loader->get_input_data()->get_normal_param());
 
 		//1階層目の学習
-		netp1 = new network_parameter3( 
-				input_data.get_input_node() , 
-				layer_12_hidden_node , 
-				input_data.get_input_node() , 
-				learning_rate , lambda , momentum );
-
-		netp1->set_network_tool( 
-				info->get_network_tool( ) );
+		m_loader->create_netp1(
+			layer_12_hidden_node,
+			learning_rate,
+			lambda,
+			momentum,
+			info);
 				
 
 		//2階層目の学習
-		netp2 = new network_parameter3(
-			       	layer_12_hidden_node , 
-				layer_23_hidden_node ,
-			       	layer_12_hidden_node , 
-				learning_rate , lambda , momentum );
-
-		netp2->set_network_tool( 
-				info->get_network_tool(  ) );
-	
-		//テスターの設置
-		if (data_structure == "aam")
-		{
-			netp1->set_tester(
-				new tester_procrutes_aam(
-				shape_proc_train,
-				texture_proc_train,
-				shape_model,
-				texture_model,
-				data_shape.get_normal_param(),
-				data_texture.get_normal_param(),
-				input_data.get_normal_param()
-				),
-				new tester_procrutes_aam(
-				shape_proc_test,
-				texture_proc_test,
-				shape_model,
-				texture_model,
-				data_shape.get_normal_param(),
-				data_texture.get_normal_param(),
-				input_data.get_normal_param()
-				));
-
-			netp2->set_tester(
-				new tester_procrutes_aam_decode(
-				shape_proc_train,
-				texture_proc_train,
-				shape_model,
-				texture_model,
-				data_shape.get_normal_param(),
-				data_texture.get_normal_param(),
-				input_data.get_normal_param(),
-				netp1
-				),
-				new tester_procrutes_aam_decode(
-				shape_proc_test,
-				texture_proc_test,
-				shape_model,
-				texture_model,
-				data_shape.get_normal_param(),
-				data_texture.get_normal_param(),
-				input_data.get_normal_param(),
-				netp1
-				));
-		}
-		else
-		{
-			netp1->set_tester(
-				new tester_procrutes(train_proc, input_data.get_normal_param()),
-				new tester_procrutes(test_proc, input_data.get_normal_param()));
-
-			netp2->set_tester(
-				new tester_decode_procrutes(netp1, train_proc, input_data.get_normal_param()),
-				new tester_decode_procrutes(netp1, test_proc, input_data.get_normal_param()));
-		}
+		m_loader->create_netp2(
+			layer_12_hidden_node,
+			layer_23_hidden_node,
+			learning_rate,
+			lambda,
+			momentum,
+			info);
 
 		
 	}
 	~LearningFrameWork()
 	{		
 		//delete
-		input_data.release();
-		input_data_test.release();
-
-		//テスター	
-		if(train_proc!=0)delete train_proc;
-		if(test_proc!=0)delete test_proc;
-
-		//network
-		if(netp1!=0)delete netp1;
-		if(netp2!=0)delete netp2;
-		if(netpa!=0)delete netpa;
-
-		if (data_structure == "aam")
-		{
-			delete shape_model;
-			delete texture_model;
-			delete shape_proc_train;
-			delete texture_proc_train;
-			delete shape_proc_test;
-			delete texture_proc_test;
-
-			data_shape.release();
-			data_texture.release();
-		}
-
-		//PCAパラメータ
-//		if(trained_pca_parameter!=0)delete trained_pca_parameter;
+		if(m_loader!=NULL)delete m_loader;
 
 		//time
 		std::cout << "time : " << ( clock() - start_time ) << std::endl;
@@ -318,27 +140,27 @@ public:
 	void Load12()
 	{
 		//一層目のデータ読み込み
-		netp1->input_weight( weight_dir_name );
-		netp1->show_mse(input_data , input_data_test , "layer12");
+		m_loader->get_netp1()->input_weight( weight_dir_name );
+		m_loader->get_netp1()->show_mse(*m_loader->get_input_data(), *m_loader->get_input_data_test(), "layer12");
 	}
 
 	void Learn12()
 	{
 		//一層目の学習
-		netp1->learn( input_data , input_data_test , epoch );
-		netp1->output_weight( weight_dir_name );
+		m_loader->get_netp1()->learn(*m_loader->get_input_data(), *m_loader->get_input_data_test(), epoch);
+		m_loader->get_netp1()->output_weight(weight_dir_name);
 	}
 
 	void Load23()
 	{
 		//ニ層目のデータ読み込み
-		netp2->input_weight( weight_dir_name23 );
+		m_loader->get_netp2()->input_weight(weight_dir_name23);
 
 		//2階層目の学習データの作成
-		data_manager middle_data = netp1->foward_all_data( input_data );
-		data_manager middle_data_test = netp1->foward_all_data( input_data_test );
+		data_manager middle_data = m_loader->get_netp1()->foward_all_data(*m_loader->get_input_data());
+		data_manager middle_data_test = m_loader->get_netp1()->foward_all_data(*m_loader->get_input_data_test());
 	
-		netp2->show_mse( middle_data , middle_data_test , "layer23" );
+		m_loader->get_netp2()->show_mse(middle_data, middle_data_test, "layer23");
 
 		middle_data.release();
 		middle_data_test.release();
@@ -347,12 +169,12 @@ public:
 	void Learn23()
 	{
 		//2階層目の学習データの作成
-		data_manager middle_data = netp1->foward_all_data( input_data );
-		data_manager middle_data_test = netp1->foward_all_data( input_data_test );
+		data_manager middle_data = m_loader->get_netp1()->foward_all_data(*m_loader->get_input_data());
+		data_manager middle_data_test = m_loader->get_netp1()->foward_all_data(*m_loader->get_input_data_test());
 
 		//2階層目の学習
-		netp2->learn( middle_data , middle_data_test , epoch );
-		netp2->output_weight( weight_dir_name23 );
+		m_loader->get_netp2()->learn( middle_data , middle_data_test , epoch );
+		m_loader->get_netp2()->output_weight(weight_dir_name23);
 
 		middle_data.release();
 		middle_data_test.release();
@@ -362,101 +184,38 @@ public:
 	{
 
 		//すべての層の学習
-		netpa = new network_parameter5( 
-				input_data.get_input_node() ,
-				layer_12_hidden_node , 
-				layer_23_hidden_node , 
-				layer_12_hidden_node , 
-				input_data.get_input_node() ,
-			       	learning_rate , lambda , momentum );
-
-		netpa->set_network_tool( 
-				info->get_network_tool( ) );
-	
-		//テスターの設置
-		if (data_structure == "aam")
-		{
-			netpa->set_tester(
-				new tester_procrutes_aam(
-				shape_proc_train,
-				texture_proc_train,
-				shape_model,
-				texture_model,
-				data_shape.get_normal_param(),
-				data_texture.get_normal_param(),
-				input_data.get_normal_param()
-				),
-				new tester_procrutes_aam(
-				shape_proc_test,
-				texture_proc_test,
-				shape_model,
-				texture_model,
-				data_shape.get_normal_param(),
-				data_texture.get_normal_param(),
-				input_data.get_normal_param()
-				));
-		}
-		else
-		{
-			netpa->set_tester(
-				new tester_procrutes(train_proc, input_data.get_normal_param()),
-				new tester_procrutes(test_proc, input_data.get_normal_param()));
-		}
+		m_loader->create_netpa(
+			layer_12_hidden_node,
+			layer_23_hidden_node,
+			learning_rate,
+			lambda,
+			momentum,
+			info);
 
 		//全層の読み込み
-		netpa->input_weight( weight_dir_nameall );
+		m_loader->get_netpa()->input_weight( weight_dir_nameall );
 	}
 
 	void LearnAll()
 	{
-		if( netpa == 0 )
+		if (m_loader->get_netpa() == 0)
 		{
-			//すべての層の学習
-			netpa = new network_parameter5( netp1 , netp2 , learning_rate , lambda , momentum );
-
-			netpa->set_network_tool( 
-					info->get_network_tool( ) );
-
-			//テスターの設置
-			if (data_structure == "aam")
-			{
-				netpa->set_tester(
-					new tester_procrutes_aam(
-					shape_proc_train,
-					texture_proc_train,
-					shape_model,
-					texture_model,
-					data_shape.get_normal_param(),
-					data_texture.get_normal_param(),
-					input_data.get_normal_param()
-					),
-					new tester_procrutes_aam(
-					shape_proc_test,
-					texture_proc_test,
-					shape_model,
-					texture_model,
-					data_shape.get_normal_param(),
-					data_texture.get_normal_param(),
-					input_data.get_normal_param()
-					));
-			}
-			else
-			{
-				netpa->set_tester(
-					new tester_procrutes(train_proc, input_data.get_normal_param()),
-					new tester_procrutes(test_proc, input_data.get_normal_param()));
-			}
+			m_loader->create_netpa(
+				learning_rate,
+				lambda,
+				momentum,
+				info);
 		}
 
-		netpa->learn( input_data , input_data_test ,epoch );
-		netpa->output_weight( weight_dir_nameall );
+		m_loader->get_netpa()->learn(*m_loader->get_input_data(), *m_loader->get_input_data_test(), epoch);
+		m_loader->get_netpa()->output_weight(weight_dir_nameall);
 	}
 
 	void output_aam_all()
 	{
 		//中間データの情報
-		data_manager middle_data = netpa->foward_all_data( input_data );
-		data_manager middle_data_test = netpa->foward_all_data( input_data_test );
+		data_manager middle_data = m_loader->get_netpa()->foward_all_data(*m_loader->get_input_data());
+		data_manager middle_data_test = m_loader->get_netpa()->foward_all_data(*m_loader->get_input_data_test());
 
 		//出力(weightではないがデータ数、ノード数、データの順で格納できるため)
 		output_weight( 
