@@ -1,0 +1,9 @@
+shape_model : shape_model
+shape_model_layer : 5
+shape_model_hidden1 : 110
+shape_model_hidden2 : 85
+
+texture_model : texture_model
+texture_model_layer : 5
+texture_model_hidden1 : 1500
+texture_model_hidden2 : 377
