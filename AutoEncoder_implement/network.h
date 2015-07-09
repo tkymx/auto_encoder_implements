@@ -229,7 +229,7 @@ public:
 public:
 	bool _exec(float mse)
 	{
-		if (mse > m_before_mse || std::abs(mse-m_before_mse) < 0.0001 )
+		if (mse > m_before_mse || abs(mse-m_before_mse) < 0.0001 )
 		{
 			//ウェイトを戻す
 			load_weight();
