@@ -5,7 +5,7 @@
 #define NETWORK
 
 /**
- *	ƒf[ƒ^‚ÌƒVƒƒƒbƒtƒ‹
+ *	ãƒ‡ãƒ¼ã‚¿ã®ã‚·ãƒ£ãƒƒãƒ•ãƒ«
  */
 void data_shuffle( float** input_data , int data_count )
 {
@@ -19,7 +19,7 @@ void data_shuffle( float** input_data , int data_count )
 }
 
 /**
- *	ƒlƒbƒgƒ[ƒNƒc[ƒ‹
+ *	ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ãƒ„ãƒ¼ãƒ«
  */
 
 enum learn_mode{ learn_mse=0 , learn_cross_entropy=1 };
@@ -27,8 +27,8 @@ enum learn_mode{ learn_mse=0 , learn_cross_entropy=1 };
 enum learn_tool{ noise_normal_tool = 0, corrupt_tool = 1, none_tool = 2 };
 
 /*
-*	ŠwK‚ÌƒCƒ“ƒ^[ƒtƒF[ƒX
-*	F–‘Oˆ—‚È‚Ç
+*	å­¦ç¿’æ™‚ã®ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹
+*	ï¼šäº‹å‰å‡¦ç†ãªã©
 */
 class network_tool
 {
@@ -86,9 +86,9 @@ public:
 
 
 /*
-*	ŠwKî•ñ‚Ì•Û‚ğs‚¤
-*	FDEA‚ğÀŒ»‚·‚é‚½‚ß‚ÌŒ‡‘¹î•ñ
-*	FŠwK‚ÌƒRƒXƒgŠÖ”‚È‚Ç
+*	å­¦ç¿’æƒ…å ±ã®ä¿æŒã‚’è¡Œã†
+*	ï¼šDEAã‚’å®Ÿç¾ã™ã‚‹ãŸã‚ã®æ¬ ææƒ…å ±
+*	ï¼šå­¦ç¿’ã®ã‚³ã‚¹ãƒˆé–¢æ•°ãªã©
 */
 class learn_info
 {
@@ -157,7 +157,7 @@ public:
 };
 
 /*
-*	ƒlƒbƒgƒ[ƒN‚ÌŠwKî•ñ‚ğƒeƒLƒXƒg‚Å‚Á‚Ä‚¨‚¢‚Ä“Ç‚İ‚İ‚ğs‚¤
+*	ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã®å­¦ç¿’æƒ…å ±ã‚’ãƒ†ã‚­ã‚¹ãƒˆã§æŒã£ã¦ãŠã„ã¦èª­ã¿è¾¼ã¿ã‚’è¡Œã†
 *	(e.f.) shape_model : /home/data/model/shape 
 */
 std::map<std::string, std::string> get_learn_dat(std::string filename)
@@ -167,7 +167,7 @@ std::map<std::string, std::string> get_learn_dat(std::string filename)
 	std::ifstream ifs(filename.c_str());
 	if (!ifs.is_open())
 	{
-		std::cout << filename << "‚ª‚ ‚è‚Ü‚¹‚ñ‚Å‚µ‚½B" << std::endl;
+		std::cout << filename << "ãŒã‚ã‚Šã¾ã›ã‚“ã§ã—ãŸã€‚" << std::endl;
 	}
 
 	while (!ifs.eof())
@@ -203,7 +203,7 @@ float get_map_param(std::map<std::string, std::string> learn_map, std::string ta
 }
 
 /*
-*@harving ƒNƒ‰ƒX
+*ã€€harving ã‚¯ãƒ©ã‚¹
 */
 class network_parameter;
 class harving_implements
@@ -229,12 +229,12 @@ public:
 public:
 	bool _exec(float mse)
 	{
-		if (mse > m_before_mse || abs(mse-m_before_mse) < 0.0001 )
+		if (mse > m_before_mse || fabs(mse-m_before_mse) < 0.0001 )
 		{
-			//ƒEƒFƒCƒg‚ğ–ß‚·
+			//ã‚¦ã‚§ã‚¤ãƒˆã‚’æˆ»ã™
 			load_weight();
 			
-			//ŠwK—¦‚ÌŒ»Û
+			//å­¦ç¿’ç‡ã®ç¾è±¡
 			less_learning_rate();
 
 			return false;
@@ -245,13 +245,13 @@ public:
 	}
 	bool exec(float mse)
 	{
-		//ˆê’è‹æŠÔ‚²‚Æ‚Ì•½‹Ï‚ğ‹‚ß‚é
+		//ä¸€å®šåŒºé–“ã”ã¨ã®å¹³å‡ã‚’æ±‚ã‚ã‚‹
 		m_current_mse += mse / m_average_count;
 		m_current_count++;
 
 		bool result = true;
 
-		//ˆê’èŠúŠÔ‚²‚Æ‚Éƒn[ƒrƒ“ƒO‚ğs‚¤B
+		//ä¸€å®šæœŸé–“ã”ã¨ã«ãƒãƒ¼ãƒ“ãƒ³ã‚°ã‚’è¡Œã†ã€‚
 		if (m_current_count >= m_average_count)
 		{
 			result = _exec(m_current_mse);
@@ -270,7 +270,7 @@ public:
 };
 
 /**
- *	ƒlƒbƒgƒ[ƒNƒpƒ‰ƒ[ƒ^	
+ *	ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿	
  */	
 
 class network_parameter
@@ -353,7 +353,7 @@ public:
 
 		data_manager corrupt_data = input_data.copy();
 
-		//ƒf[ƒ^‚Ì–‘Oˆ—
+		//ãƒ‡ãƒ¼ã‚¿ã®äº‹å‰å‡¦ç†
 		prepare_data( corrupt_data );
 
 		for( int data = 0; data < input_data.get_data_count() ; data++ )
@@ -414,7 +414,7 @@ public:
 			std::cout << "time: start" << std::endl;
 			current_time = clock();
 #endif
-			//ŠwK‡”Ô‚ÌƒVƒƒƒbƒtƒ‹
+			//å­¦ç¿’é †ç•ªã®ã‚·ãƒ£ãƒƒãƒ•ãƒ«
 			data_shuffle( data.get_input_data() , data.get_data_count() );
 
 #ifdef TIME_TEST			
@@ -427,15 +427,16 @@ public:
 			
 			//test
 			std::cout << "epoch" << e ;
-			std::cout << ":test:" << show_calc_mse( data_test , test_tester );
-			std::cout << ":train:" << show_calc_mse( data , train_tester ) << ":lr:" << learning_rate << std::endl;
+//			std::cout << ":test:" << show_calc_mse( data_test , test_tester );
+//			std::cout << ":train:" << show_calc_mse( data , train_tester ) << ":lr:" << learning_rate << std::endl;
+			std::cout << ":test:" << show_calc_mse(data_test, test_tester) << ":lr:" << learning_rate << std::endl;
 
 #ifdef TIME_TEST			
 			std::cout << "time test : " << clock() - current_time << std::endl;
 			current_time = clock();
 #endif
 
-			//ƒn[ƒrƒ“ƒO“®ì
+			//ãƒãƒ¼ãƒ“ãƒ³ã‚°å‹•ä½œ
 			if (m_harving != NULL)
 			{
 				if (!m_harving->exec(get_calc_mse(data_test, test_tester)))
@@ -444,7 +445,7 @@ public:
 				}
 			}
 
-			//I—¹ˆ—
+			//çµ‚äº†å‡¦ç†
 			if (learning_rate <= learning_rate_th)
 			{
 				break;
@@ -455,9 +456,9 @@ public:
 	void show_mse( data_manager &data , data_manager &data_test,std::string str)
 	{
 		//test
-		std::cout << str << ":test:" << show_calc_mse( data_test , test_tester );
-		std::cout << ":train:" << show_calc_mse( data , train_tester ) << std::endl;
-	
+		std::cout << str << ":test:" << show_calc_mse(data_test, test_tester) << std::endl;
+//		std::cout << ":train:" << show_calc_mse( data , train_tester ) << std::endl;
+
 	}
 
 	data_manager foward_all_data( data_manager data , bool isSingle = false )
@@ -495,6 +496,22 @@ public:
 		return mse;
 	}
 
+	std::vector<std::string> show_calc_mse_each(data_manager &input, tester *_tester, bool isSingle = false)
+	{
+		data_manager output = input.copy();
+
+		for (int i = 0; i< input.get_data_count(); i++)
+		{
+			foward(input.get_input_data()[i], output.get_input_data()[i], isSingle);
+		}
+
+		std::vector<std::string> mse = _tester->show_mse_each(input, output);
+
+		output.release();
+
+		return mse;
+	}
+
 	float get_calc_mse(data_manager &input, tester *_tester, bool isSingle = false)
 	{
 		data_manager output = input.copy();
@@ -509,6 +526,16 @@ public:
 		output.release();
 
 		return mse;
+	}
+
+	void output_each_mse_test( data_manager &input )
+	{
+		std::vector<std::string> mses = show_calc_mse_each(input, test_tester);
+
+		for (int i = 0; i < input.get_data_count(); i++)
+		{
+			std::cout << "mse:"  << mses.at(i) << " " << std::endl;
+		}
 	}
 
 	
@@ -636,14 +663,14 @@ public:
 		init_data( weight12_d , hidden2_node , input_node + 1 );
 		init_data( weight23_d , output_node , hidden2_node + 1 );
 
-		//’l‚ÌƒRƒs[
+		//å€¤ã®ã‚³ãƒ”ãƒ¼
 		//copy_array( weight12 , weight12_store , hidden2_node , input_node );
 		//copy_array( weight23 , weight23_store , output_node , hidden2_node );
 
-		//‚±‚Á‚¿‚Ì‚Ù‚¤‚ª«”\‚ª—Ç‚¢
+		//ã“ã£ã¡ã®ã»ã†ãŒæ€§èƒ½ãŒè‰¯ã„
 		update_weight_store( weight12 , weight23 , weight12_store , weight23_store , input_node , hidden2_node );
 
-		//ƒn[ƒrƒ“ƒO‚Ìİ’è
+		//ãƒãƒ¼ãƒ“ãƒ³ã‚°ã®è¨­å®š
 		m_harving = new harving_implements_3( 20 , this );
 
 		std::cout << "network_parameter3:"  << input_node << " " << hidden2_node  << " " << output_node << std::endl;
@@ -872,7 +899,7 @@ public:
 		init_data( weight34_d , hidden4_node , hidden3_node + 1 );
 		init_data( weight45_d , output_node , hidden4_node + 1 );		
 
-		//ƒn[ƒrƒ“ƒO‚Ìİ’è
+		//ãƒãƒ¼ãƒ“ãƒ³ã‚°ã®è¨­å®š
 		m_harving = new harving_implements_5(20, this);
 
 	}
@@ -889,11 +916,11 @@ public:
 				_middle4_node , 
 				_output_node );
 
-		//’l‚ÌƒRƒs[
+		//å€¤ã®ã‚³ãƒ”ãƒ¼
 		//copy_array( weight12 , weight12_store , hidden2_node , input_node );
 		//copy_array( weight23 , weight23_store , output_node , hidden2_node );
 
-		//‚±‚Á‚¿‚Ì‚Ù‚¤‚ª«”\‚ª—Ç‚¢
+		//ã“ã£ã¡ã®ã»ã†ãŒæ€§èƒ½ãŒè‰¯ã„
 		update_weight_store( weight12 , weight45 , weight12_store , weight45_store , input_node , hidden2_node );
 		update_weight_store( weight23 , weight34 , weight23_store , weight34_store , hidden2_node , hidden3_node );
 
@@ -917,11 +944,11 @@ public:
 		copy_array( netp2->weight23 , weight34 , hidden4_node , hidden3_node + 1);
 		copy_array( netp1->weight23 , weight45 , output_node , hidden4_node + 1);
 
-		//’l‚ÌƒRƒs[
+		//å€¤ã®ã‚³ãƒ”ãƒ¼
 		//copy_array( weight12 , weight12_store , hidden2_node , input_node );
 		//copy_array( weight23 , weight23_store , output_node , hidden2_node );
 
-		//‚±‚Á‚¿‚Ì‚Ù‚¤‚ª«”\‚ª—Ç‚¢
+		//ã“ã£ã¡ã®ã»ã†ãŒæ€§èƒ½ãŒè‰¯ã„
 		update_weight_store( weight12 , weight45 , weight12_store , weight45_store , input_node , hidden2_node );
 		update_weight_store( weight23 , weight34 , weight23_store , weight34_store , hidden2_node , hidden3_node );
 
@@ -1027,7 +1054,7 @@ public:
 };
 
 /*
-* ƒlƒbƒgƒ[ƒN‚ğ—p‚¢‚½tester
+* ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã‚’ç”¨ã„ãŸtester
 */
 
 class tester_decode_procrutes : public tester_procrutes
@@ -1045,30 +1072,65 @@ public:
 	{
 		if( input.get_input_node() != output.get_input_node() )
 		{
-			std::cout << "“ü—ÍŸŒ³”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 		
 		if( input.get_data_count() != output.get_data_count() )
 		{
-			std::cout << "ƒf[ƒ^‚ÌŒÂ”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "ãƒ‡ãƒ¼ã‚¿ã®å€‹æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 
 		data_manager data = output.copy();
 		data_manager d_data = data_manager::create_data( data.get_data_count() , net_param->get_input_node() );
 
-		//ƒlƒbƒgƒ[ƒN‚Ì“`”À
+		//ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã®ä¼æ¬
 		FORI( data.get_data_count() )
 		{
 			net_param->decode( data.get_input_data()[i] , d_data.get_input_data()[i] , false );
 		}
 
-		//‹t³‹K‰»
+		//é€†æ­£è¦åŒ–
 		d_data.denormalize( 1 , np);
 
-		//ƒvƒƒNƒ‰ƒeƒXƒuƒ“ƒZƒL
+		//ãƒ—ãƒ­ã‚¯ãƒ©ãƒ†ã‚¹ãƒ–ãƒ³ã‚»ã‚­
 		pparameter->denormalize( d_data );
 
 		float mse = ::get_mse( pparameter->get_data().get_input_data() , d_data.get_input_data() , data.get_data_count() , d_data.get_input_node() );
+
+		data.release();
+		d_data.release();
+
+		return mse;
+	}
+
+	virtual std::vector<float> get_mse_each(data_manager &input, data_manager &output)
+	{
+		if (input.get_input_node() != output.get_input_node())
+		{
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		if (input.get_data_count() != output.get_data_count())
+		{
+			std::cout << "ãƒ‡ãƒ¼ã‚¿ã®å€‹æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		data_manager data = output.copy();
+		data_manager d_data = data_manager::create_data(data.get_data_count(), net_param->get_input_node());
+
+		//ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã®ä¼æ¬
+		FORI(data.get_data_count())
+		{
+			net_param->decode(data.get_input_data()[i], d_data.get_input_data()[i], false);
+		}
+
+		//é€†æ­£è¦åŒ–
+		d_data.denormalize(1, np);
+
+		//ãƒ—ãƒ­ã‚¯ãƒ©ãƒ†ã‚¹ãƒ–ãƒ³ã‚»ã‚­
+		pparameter->denormalize(d_data);
+
+		std::vector<float> mse = ::get_mse_each(pparameter->get_data().get_input_data(), d_data.get_input_data(), data.get_data_count(), d_data.get_input_node());
 
 		data.release();
 		d_data.release();
@@ -1110,42 +1172,42 @@ public:
 	{
 	}
 
-	//ƒtƒHƒ[ƒhŒã‚Ìƒf[ƒ^Œ³‚Ìƒf[ƒ^‚©‚çMSE‚ÌZo‚Æ•\¦‚ğs‚¤
+	//ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰å¾Œã®ãƒ‡ãƒ¼ã‚¿å…ƒã®ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰MSEã®ç®—å‡ºã¨è¡¨ç¤ºã‚’è¡Œã†
 	virtual std::string show_mse(data_manager &input, data_manager &output)
 	{
 		if (input.get_input_node() != output.get_input_node())
 		{
-			std::cout << "“ü—ÍŸŒ³”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 
 		if (input.get_data_count() != output.get_data_count())
 		{
-			std::cout << "ƒf[ƒ^”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 
 		data_manager data_o = output.copy();
 
-		//aamƒpƒ‰ƒ[ƒ^‚Ì‹t³‹K‰»
+		//aamãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®é€†æ­£è¦åŒ–
 		data_o.denormalize(1, np);
 
-		//aamƒpƒ‰ƒ[ƒ^‚Ì•ªŠ„
+		//aamãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®åˆ†å‰²
 		data_manager shape_param;
 		data_manager texture_param;
 		data_o.split(shape_model->get_hidden_node_count(), shape_param, texture_param);
 
-		//shape,texture‚Ì•œŒ³
+		//shape,textureã®å¾©å…ƒ
 		data_manager shape = shape_model->decode_all_data(shape_param);
 		data_manager texture = texture_model->decode_all_data(texture_param);
 
-		//shape,texture‚Ì‹t³‹K‰»
+		//shape,textureã®é€†æ­£è¦åŒ–
 		shape.denormalize(1, np_shape_model);
 		texture.denormalize(1, np_texture_model);
 
-		//ƒvƒƒNƒ‰ƒXƒeƒN•ªÍ‚Ì‹t³‹K‰»
+		//ãƒ—ãƒ­ã‚¯ãƒ©ã‚¹ãƒ†ã‚¯åˆ†æã®é€†æ­£è¦åŒ–
 		pparameter_shape->denormalize(shape);
 		pparameter_texture->denormalize(texture);
 
-		//mse‚ÌZo
+		//mseã®ç®—å‡º
 		float mse_shape = ::get_mse(
 			pparameter_shape->get_data().get_input_data(),
 			shape.get_input_data(),
@@ -1158,7 +1220,7 @@ public:
 			texture.get_data_count(),
 			texture.get_input_node());
 
-		//‰ğ•ú
+		//è§£æ”¾
 		data_o.release();
 		shape_param.release();
 		texture_param.release();
@@ -1174,6 +1236,78 @@ public:
 #endif
 
 		return c;
+	}
+
+	//ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰å¾Œã®ãƒ‡ãƒ¼ã‚¿å…ƒã®ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰MSEã®ç®—å‡ºã¨è¡¨ç¤ºã‚’è¡Œã†
+	virtual std::vector<std::string> show_mse_each(data_manager &input, data_manager &output)
+	{
+		if (input.get_input_node() != output.get_input_node())
+		{
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		if (input.get_data_count() != output.get_data_count())
+		{
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		data_manager data_o = output.copy();
+
+		//aamãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®é€†æ­£è¦åŒ–
+		data_o.denormalize(1, np);
+
+		//aamãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®åˆ†å‰²
+		data_manager shape_param;
+		data_manager texture_param;
+		data_o.split(shape_model->get_hidden_node_count(), shape_param, texture_param);
+
+		//shape,textureã®å¾©å…ƒ
+		data_manager shape = shape_model->decode_all_data(shape_param);
+		data_manager texture = texture_model->decode_all_data(texture_param);
+
+		//shape,textureã®é€†æ­£è¦åŒ–
+		shape.denormalize(1, np_shape_model);
+		texture.denormalize(1, np_texture_model);
+
+		//ãƒ—ãƒ­ã‚¯ãƒ©ã‚¹ãƒ†ã‚¯åˆ†æã®é€†æ­£è¦åŒ–
+		pparameter_shape->denormalize(shape);
+		pparameter_texture->denormalize(texture);
+
+		//mseã®ç®—å‡º
+		std::vector<float> mse_shape = ::get_mse_each(
+			pparameter_shape->get_data().get_input_data(),
+			shape.get_input_data(),
+			shape.get_data_count(),
+			shape.get_input_node());
+
+		std::vector<float> mse_texture = ::get_mse_each(
+			pparameter_texture->get_data().get_input_data(),
+			texture.get_input_data(),
+			texture.get_data_count(),
+			texture.get_input_node());
+
+		//è§£æ”¾
+		data_o.release();
+		shape_param.release();
+		texture_param.release();
+		shape.release();
+		texture.release();
+
+		char c[256];
+
+		std::vector<std::string> mse_text;
+
+		for (int i = 0; i < mse_shape.size(); i++)
+		{
+#ifdef _WIN32
+			sprintf_s(c, "%lf %lf", mse_shape.at(i), mse_texture.at(i));
+#else
+			sprintf(c, "%lf %lf", mse_shape.at(i), mse_texture.at(i));
+#endif
+			mse_text.push_back( c );
+		}
+
+		return mse_text;
 	}
 };
 
@@ -1208,43 +1342,43 @@ public:
 	{
 	}
 
-	//ƒtƒHƒ[ƒhŒã‚Ìƒf[ƒ^Œ³‚Ìƒf[ƒ^‚©‚çMSE‚ÌZo‚Æ•\¦‚ğs‚¤
+	//ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰å¾Œã®ãƒ‡ãƒ¼ã‚¿å…ƒã®ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰MSEã®ç®—å‡ºã¨è¡¨ç¤ºã‚’è¡Œã†
 	virtual std::string show_mse(data_manager &input, data_manager &output)
 	{
 		if (input.get_input_node() != output.get_input_node())
 		{
-			std::cout << "“ü—ÍŸŒ³”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 
 		if (input.get_data_count() != output.get_data_count())
 		{
-			std::cout << "ƒf[ƒ^”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 
 		data_manager data = output.copy();
 		data_manager data_o = net_param->decode_all_data(data);
 
-		//aamƒpƒ‰ƒ[ƒ^‚Ì‹t³‹K‰»
+		//aamãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®é€†æ­£è¦åŒ–
 		data_o.denormalize(1, np);
 
-		//aamƒpƒ‰ƒ[ƒ^‚Ì•ªŠ„
+		//aamãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®åˆ†å‰²
 		data_manager shape_param;
 		data_manager texture_param;
 		data_o.split(shape_model->get_hidden_node_count(), shape_param, texture_param);
 
-		//shape,texture‚Ì•œŒ³
+		//shape,textureã®å¾©å…ƒ
 		data_manager shape = shape_model->decode_all_data(shape_param);
 		data_manager texture = texture_model->decode_all_data(texture_param);
 
-		//shape,texture‚Ì‹t³‹K‰»
+		//shape,textureã®é€†æ­£è¦åŒ–
 		shape.denormalize(1, np_shape_model);
 		texture.denormalize(1, np_texture_model);
 
-		//ƒvƒƒNƒ‰ƒXƒeƒN•ªÍ‚Ì‹t³‹K‰»
+		//ãƒ—ãƒ­ã‚¯ãƒ©ã‚¹ãƒ†ã‚¯åˆ†æã®é€†æ­£è¦åŒ–
 		pparameter_shape->denormalize(shape);
 		pparameter_texture->denormalize(texture);
 
-		//mse‚ÌZo
+		//mseã®ç®—å‡º
 		float mse_shape = ::get_mse(
 			pparameter_shape->get_data().get_input_data(),
 			shape.get_input_data(),
@@ -1257,7 +1391,7 @@ public:
 			texture.get_data_count(),
 			texture.get_input_node());
 
-		//‰ğ•ú
+		//è§£æ”¾
 		data.release();
 		data_o.release();
 		shape_param.release();
@@ -1275,14 +1409,206 @@ public:
 
 		return c;
 	}
+
+	//ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰å¾Œã®ãƒ‡ãƒ¼ã‚¿å…ƒã®ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰MSEã®ç®—å‡ºã¨è¡¨ç¤ºã‚’è¡Œã†
+	virtual std::vector<std::string> show_mse_each(data_manager &input, data_manager &output)
+	{
+		if (input.get_input_node() != output.get_input_node())
+		{
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		if (input.get_data_count() != output.get_data_count())
+		{
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		data_manager data = output.copy();
+		data_manager data_o = net_param->decode_all_data(data);
+
+		//aamãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®é€†æ­£è¦åŒ–
+		data_o.denormalize(1, np);
+
+		//aamãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®åˆ†å‰²
+		data_manager shape_param;
+		data_manager texture_param;
+		data_o.split(shape_model->get_hidden_node_count(), shape_param, texture_param);
+
+		//shape,textureã®å¾©å…ƒ
+		data_manager shape = shape_model->decode_all_data(shape_param);
+		data_manager texture = texture_model->decode_all_data(texture_param);
+
+		//shape,textureã®é€†æ­£è¦åŒ–
+		shape.denormalize(1, np_shape_model);
+		texture.denormalize(1, np_texture_model);
+
+		//ãƒ—ãƒ­ã‚¯ãƒ©ã‚¹ãƒ†ã‚¯åˆ†æã®é€†æ­£è¦åŒ–
+		pparameter_shape->denormalize(shape);
+		pparameter_texture->denormalize(texture);
+
+		//mseã®ç®—å‡º
+		std::vector<float> mse_shape = ::get_mse_each(
+			pparameter_shape->get_data().get_input_data(),
+			shape.get_input_data(),
+			shape.get_data_count(),
+			shape.get_input_node());
+
+		std::vector<float> mse_texture = ::get_mse_each(
+			pparameter_texture->get_data().get_input_data(),
+			texture.get_input_data(),
+			texture.get_data_count(),
+			texture.get_input_node());
+
+		//è§£æ”¾
+		data.release();
+		data_o.release();
+		shape_param.release();
+		texture_param.release();
+		shape.release();
+		texture.release();
+
+		char c[256];
+
+		std::vector<std::string> mse_text;
+
+		for (int i = 0; i < mse_shape.size(); i++)
+		{
+#ifdef _WIN32
+			sprintf_s(c, "%lf %lf", mse_shape.at(i), mse_texture.at(i));
+#else
+			sprintf(c, "%lf %lf", mse_shape.at(i), mse_texture.at(i));
+#endif
+			mse_text.push_back(c);
+	}
+
+		return mse_text;
+	}
+
 };
 
 
-//ƒlƒbƒgƒ[ƒN‚Ì“Ç‚İ‚İ
-//dir_nameFƒlƒbƒgƒ[ƒN‚ÌƒtƒHƒ‹ƒ_–¼
-//dir_name+_layer : ƒlƒbƒgƒ[ƒN‚ÌƒŒƒCƒ„[”
-//dir_name+_hidden1 : ˆê‚Â–Ú‚Ì‰B‚ê‘w
-//dir_name+_hidden2 : “ñ‚Â–Ú‚Ì‰B‚ê‘w
+class tester_procrutes_sep_decode : public tester_procrutes_sep
+{
+protected:
+	network_parameter* net_param;
+public:
+	tester_procrutes_sep_decode(
+		procrustes_parameter *_pparameterS, 
+		procrustes_parameter *_pparameterT, 
+		int sep_count, 
+		normal_param _np, 
+		network_parameter* net)
+		: tester_procrutes_sep( _pparameterS , _pparameterT , sep_count , _np )
+		, net_param(net)
+	{
+	}
+	virtual ~tester_procrutes_sep_decode()
+	{
+	}
+
+	virtual std::string show_mse(data_manager &input, data_manager &output)
+	{
+		if (input.get_input_node() != output.get_input_node())
+		{
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		if (input.get_data_count() != output.get_data_count())
+		{
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		data_manager data = output.copy();
+		data_manager data_o = net_param->decode_all_data(data);
+
+		data_o.denormalize(1, np);
+
+		data_manager shape_data;
+		data_manager texture_data;
+
+		data_o.split(m_sep_count, shape_data, texture_data);
+
+		pparameterS->denormalize(shape_data);
+		pparameterT->denormalize(texture_data);
+
+		float mse_shape = ::get_mse(pparameterS->get_data().get_input_data(), shape_data.get_input_data(), shape_data.get_data_count(), shape_data.get_input_node());
+		float mse_texture = ::get_mse(pparameterT->get_data().get_input_data(), texture_data.get_input_data(), texture_data.get_data_count(), texture_data.get_input_node());
+
+		data.release();
+		data_o.release();
+		shape_data.release();
+		texture_data.release();
+
+		char c[256];
+
+#ifdef _WIN32
+		sprintf_s(c, "%lf %lf", mse_shape, mse_texture);
+#else
+		sprintf(c, "%lf %lf", mse_shape, mse_texture);
+#endif
+
+		return c;
+	}
+
+	virtual std::vector<std::string> show_mse_each(data_manager &input, data_manager &output)
+	{
+		if (input.get_input_node() != output.get_input_node())
+		{
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		if (input.get_data_count() != output.get_data_count())
+		{
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		data_manager data = output.copy();
+		data_manager data_o = net_param->decode_all_data(data);
+
+		data_o.denormalize(1, np);
+
+		data_manager shape_data;
+		data_manager texture_data;
+
+		data_o.split(m_sep_count, shape_data, texture_data);
+
+		pparameterS->denormalize(shape_data);
+		pparameterT->denormalize(texture_data);
+
+		std::vector<float> mse_shape = ::get_mse_each(pparameterS->get_data().get_input_data(), shape_data.get_input_data(), shape_data.get_data_count(), shape_data.get_input_node());
+		std::vector<float> mse_texture = ::get_mse_each(pparameterT->get_data().get_input_data(), texture_data.get_input_data(), texture_data.get_data_count(), texture_data.get_input_node());
+
+		data.release();
+		data_o.release();
+		shape_data.release();
+		texture_data.release();
+
+		char c[256];
+
+		std::vector<std::string> mse_text;
+
+		for (int i = 0; i < mse_shape.size(); i++)
+		{
+#ifdef _WIN32
+			sprintf_s(c, "%lf %lf", mse_shape.at(i), mse_texture.at(i));
+#else
+			sprintf(c, "%lf %lf", mse_shape.at(i), mse_texture.at(i));
+#endif
+			mse_text.push_back(c);
+		}
+
+		return mse_text;
+
+	}
+
+};
+
+
+//ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã®èª­ã¿è¾¼ã¿
+//dir_nameï¼šãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã®ãƒ•ã‚©ãƒ«ãƒ€å
+//dir_name+_layer : ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã®ãƒ¬ã‚¤ãƒ¤ãƒ¼æ•°
+//dir_name+_hidden1 : ä¸€ã¤ç›®ã®éš ã‚Œå±¤
+//dir_name+_hidden2 : äºŒã¤ç›®ã®éš ã‚Œå±¤
 network_parameter* get_network_parameter(
 	std::string dir_name,
 	std::map<std::string, std::string> learn_map,

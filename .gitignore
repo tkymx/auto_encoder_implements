@@ -2,3 +2,6 @@
 *.lastbuildstate
 *.tlog
 *.opensdf
+*.idb
+*.dat
+*.txt

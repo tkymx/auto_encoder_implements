@@ -1,6 +1,7 @@
 #include "utility.h"
 #include <fstream>
 #include <assert.h>
+#include <vector>
 
 #ifndef DATA_DEFINE
 #define DATA_DEFINE
@@ -11,7 +12,7 @@ class procrustes_parameter;
 class data_manager
 {
 protected:
-	//ƒf[ƒ^
+	//ãƒ‡ãƒ¼ã‚¿
 	float** input_data;
 	int data_count;
 	int input_node;
@@ -112,10 +113,31 @@ public:
 	{
 		::denormalize( input_data , data_count , input_node , _np , mode );
 	}
+
+	data_manager operator+(data_manager& _data)
+	{
+		data_manager data = data_manager::create_data(data_count, input_node + _data.input_node);
+
+		FORI(data_count)
+		{
+			FORJ(input_node)
+			{
+				data.input_data[i][j] = input_data[i][j];
+			}
+			FORJ(_data.input_node)
+			{
+				int jj = input_node + j;
+
+				data.input_data[i][jj] = _data.input_data[i][j];
+			}
+		}
+
+		return data;
+	}
 };
 
-//AAMƒpƒ‰ƒ[ƒ^‚Ì“Ç‚İ‚İ
-//@–¼‘O‚Ítrain_texture.dat ‚È‚çtrain‚Ü‚Å‚Ìw’è‚Å—Ç‚¢
+//AAMãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®èª­ã¿è¾¼ã¿
+//ã€€åå‰ã¯train_texture.dat ãªã‚‰trainã¾ã§ã®æŒ‡å®šã§è‰¯ã„
 data_manager load_data_aam( std::string filename , int &boundary_count )
 {
 	std::string filename_shape = filename + "_shape_aam.dat";
@@ -127,12 +149,12 @@ data_manager load_data_aam( std::string filename , int &boundary_count )
 	texture_file.open( filename_texture.c_str() , std::ios::in | std::ios::binary );
 	if (!shape_file.is_open())
 	{
-		std::cout << filename_shape << "‚ª‚Â‚©‚è‚Ü‚¹‚ñ" << std::endl;
+		std::cout << filename_shape << "ãŒã¤ã‹ã‚Šã¾ã›ã‚“" << std::endl;
 		exit(1);
 	}
 	if (!shape_file.is_open())
 	{
-		std::cout << filename_shape << "‚ª‚Â‚©‚è‚Ü‚¹‚ñ" << std::endl;
+		std::cout << filename_shape << "ãŒã¤ã‹ã‚Šã¾ã›ã‚“" << std::endl;
 		exit(1);
 	}
 
@@ -146,7 +168,7 @@ data_manager load_data_aam( std::string filename , int &boundary_count )
 
 	if( count_shape != count_texture )
 	{
-		std::cout << "ƒf[ƒ^‚Ì‘”‚ªˆÙ‚È‚è‚Ü‚·" << count_shape << " " << count_texture << std::endl;
+		std::cout << "ãƒ‡ãƒ¼ã‚¿ã®ç·æ•°ãŒç•°ãªã‚Šã¾ã™" << count_shape << " " << count_texture << std::endl;
 	}
 
 	data_manager input_data = data_manager::create_data( count_shape , number_shape + number_texture );
@@ -183,7 +205,7 @@ data_manager load_data_texture( std::string filename  )
 		return data_manager();
 	}
 
-	// shape –³‹
+	// shape ç„¡è¦–
 
 	int count = get_stream4<int>( ifs );
 	int num = get_stream4<int>( ifs );
@@ -235,7 +257,7 @@ data_manager load_data_shape( std::string filename  )
 		return data_manager();
 	}
 
-	// shape‚Ì‚İ
+	// shapeã®ã¿
 
 	int count = get_stream4<int>( ifs );
 	int num = get_stream4<int>( ifs );
@@ -258,7 +280,28 @@ data_manager load_data_shape( std::string filename  )
 	return input_data;
 }
 
-//PCA‚Ìå¬•ªƒpƒ‰ƒ[ƒ^‚Ì“Ç‚İ‚İiŸŒ³”Cƒf[ƒ^”j‚ÆŠi”[‚³‚ê‚Ä‚¢‚é‚Ì‚Å”½‘Î‚É“Ç‚İ‚Ş
+data_manager load_data_shape_texture(std::string filename,int& shape_node_count)
+{
+	data_manager shape_data = load_data_shape(filename);
+	data_manager texture_data = load_data_texture(filename);
+	if (!shape_data.is_open() || !texture_data.is_open())
+	{
+		return data_manager();
+	}
+
+	shape_node_count = shape_data.get_input_node();
+
+	data_manager output = shape_data + texture_data;
+
+	shape_data.release();
+	texture_data.release();
+
+	return output;
+
+}
+
+
+//PCAã®ä¸»æˆåˆ†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®èª­ã¿è¾¼ã¿ï¼ˆæ¬¡å…ƒæ•°ï¼Œãƒ‡ãƒ¼ã‚¿æ•°ï¼‰ã¨æ ¼ç´ã•ã‚Œã¦ã„ã‚‹ã®ã§åå¯¾ã«èª­ã¿è¾¼ã‚€
 data_manager load_data_pca_parameter( std::string filename  )
 {
 	std::cout << "load:" << filename << std::endl;
@@ -293,15 +336,15 @@ data_manager load_data_pca_parameter( std::string filename  )
 
 
 /*
- *	PCA‚Ìƒpƒ‰ƒ[ƒ^‚É‚æ‚é³‹K‰»‚İ‚½‚¢‚È‚à‚Ì
+ *	PCAã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã«ã‚ˆã‚‹æ­£è¦åŒ–ã¿ãŸã„ãªã‚‚ã®
  */
 class pca_parameter
 {
 protected:
-	float** eigen_matrix;	//ŒÅ—LƒxƒNƒgƒ‹(restore_data_count,parameter_count)
-	float*	mean_vector;	//•½‹Ï’l(parameter_count)
-	int restore_data_count;	//PCA‚Å•œŒ³Œã‚Ìƒf[ƒ^‚ÌŸŒ³”
-	int parameter_count;	//å¬•ªƒpƒ‰ƒ[ƒ^‚ÌŸŒ³”
+	float** eigen_matrix;	//å›ºæœ‰ãƒ™ã‚¯ãƒˆãƒ«(restore_data_count,parameter_count)
+	float*	mean_vector;	//å¹³å‡å€¤(parameter_count)
+	int restore_data_count;	//PCAã§å¾©å…ƒå¾Œã®ãƒ‡ãƒ¼ã‚¿ã®æ¬¡å…ƒæ•°
+	int parameter_count;	//ä¸»æˆåˆ†ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®æ¬¡å…ƒæ•°
 public:
 	pca_parameter()
 		: eigen_matrix()
@@ -314,25 +357,25 @@ public:
 public:
 	bool load_pca_parameter( std::string eigen_file_path , std::string mean_file_path )
 	{
-		//ŒÅ—LƒxƒNƒgƒ‹‚Ì“Ç‚İ‚İ
+		//å›ºæœ‰ãƒ™ã‚¯ãƒˆãƒ«ã®èª­ã¿è¾¼ã¿
 		eigen_matrix = input_matrix( restore_data_count , parameter_count , eigen_file_path );
 		if(eigen_matrix==NULL)
 		{
-			std::cout << eigen_file_path << "‚ª‘¶İ‚µ‚Ä‚¢‚Ü‚¹‚ñ" << std::endl;
+			std::cout << eigen_file_path << "ãŒå­˜åœ¨ã—ã¦ã„ã¾ã›ã‚“" << std::endl;
 		}
 
-		//•½‹Ï’l‚Ì“Ç‚İ‚İ
+		//å¹³å‡å€¤ã®èª­ã¿è¾¼ã¿
 		int dim = 0;
 		mean_vector = input_vector( dim , mean_file_path );
 		if(mean_vector==NULL)
 		{
-			std::cout << mean_file_path << "‚ª‘¶İ‚µ‚Ä‚¢‚Ü‚¹‚ñ" << std::endl;
+			std::cout << mean_file_path << "ãŒå­˜åœ¨ã—ã¦ã„ã¾ã›ã‚“" << std::endl;
 		}
 
-		//“Ç‚İ‚ñ‚¾ƒf[ƒ^‚ÌŸŒ³”‚ÌƒeƒXƒg
+		//èª­ã¿è¾¼ã‚“ã ãƒ‡ãƒ¼ã‚¿ã®æ¬¡å…ƒæ•°ã®ãƒ†ã‚¹ãƒˆ
 		if( dim != restore_data_count )
 		{
-			std::cout << "PCAƒtƒ@ƒCƒ‹‚Ì‘Î‰‚ªæ‚ê‚Ä‚¢‚Ü‚¹‚ñ " << restore_data_count << " " << dim << std::endl;
+			std::cout << "PCAãƒ•ã‚¡ã‚¤ãƒ«ã®å¯¾å¿œãŒå–ã‚Œã¦ã„ã¾ã›ã‚“ " << restore_data_count << " " << dim << std::endl;
 		}	
 
 		return true;
@@ -342,27 +385,27 @@ public:
 		float** restore_data = new_array( restore_data_count , data.get_data_count() );
 		float** learned_data = new_array( data.get_input_node() , data.get_data_count() );
 
-		//ƒtƒHƒ[ƒhŒã‚Ìƒf[ƒ^‚ğ“]’u
+		//ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰å¾Œã®ãƒ‡ãƒ¼ã‚¿ã‚’è»¢ç½®
 		t_matrix( data.get_input_data() , data.get_data_count() , data.get_input_node() , learned_data );
 		
-		//ŒÅ—LƒxƒNƒgƒ‹‚Æå¬•ªƒpƒ‰ƒƒ^[ƒ^‚ÌŠ|‚¯Z
+		//å›ºæœ‰ãƒ™ã‚¯ãƒˆãƒ«ã¨ä¸»æˆåˆ†ãƒ‘ãƒ©ãƒ¡ã‚¿ãƒ¼ã‚¿ã®æ›ã‘ç®—
 		mul_matrix( 
 				eigen_matrix , restore_data_count , parameter_count,
 				learned_data , data.get_input_node() , data.get_data_count(),
 				restore_data );
 
-		//•½‹ÏŒ`ó‚Ì‘«‚µZ
+		//å¹³å‡å½¢çŠ¶ã®è¶³ã—ç®—
 		plus_horizontal( 
 				restore_data , restore_data_count , data.get_data_count(),
 				mean_vector , restore_data_count);
 
-		//“]’n‚µ‚Ä‚¢‚ê‚é
+		//è»¢åœ°ã—ã¦ã„ã‚Œã‚‹
 		data_manager deconvert_data = data_manager::create_data( data.get_data_count() , restore_data_count );
 		t_matrix( 
 				restore_data , restore_data_count , data.get_data_count() , 
 				deconvert_data.get_input_data() );
 
-		//‰ğ•ú
+		//è§£æ”¾
 		delete_array( restore_data , restore_data_count );
 		delete_array( learned_data , data.get_input_node() );
 				
@@ -371,7 +414,7 @@ public:
 };
 
 /*
- *	ƒvƒƒNƒ‰ƒXƒeƒX•ªÍ‚É‚æ‚Á‚Ä“¾‚é‚±‚Æ‚ª‚Å‚«‚½³‹K‰»ƒpƒ‰ƒ[ƒ^
+ *	ãƒ—ãƒ­ã‚¯ãƒ©ã‚¹ãƒ†ã‚¹åˆ†æã«ã‚ˆã£ã¦å¾—ã‚‹ã“ã¨ãŒã§ããŸæ­£è¦åŒ–ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
  */
 class procrustes_parameter
 {
@@ -382,8 +425,8 @@ protected:
 	float* ty;
 	float* alpha;
 	float* beta;
-	data_manager data_shape;	//³‰ğƒf[ƒ^
-	data_manager data_texture;	//³‰ğƒf[ƒ^
+	data_manager data_shape;	//æ­£è§£ãƒ‡ãƒ¼ã‚¿
+	data_manager data_texture;	//æ­£è§£ãƒ‡ãƒ¼ã‚¿
 public:
 	procrustes_parameter()
 		: sx(0)
@@ -409,7 +452,7 @@ public:
 		return data_texture;
 	}
 
-	//ƒf[ƒ^‚ª“Ç‚İ‚Ü‚ê‚Ä‚¢‚é‚©
+	//ãƒ‡ãƒ¼ã‚¿ãŒèª­ã¿è¾¼ã¾ã‚Œã¦ã„ã‚‹ã‹
 	bool isActive()
 	{
 		if( sx == 0 )return false;
@@ -513,7 +556,7 @@ public:
 	}
 	virtual void denormalize( data_manager data )
 	{
-		//•ÏŠ·
+		//å¤‰æ›
 		for( int i = 0 ;i < data_shape.get_data_count() ; i++ )
 		{
 			for( int j = 0 , k = data_shape.get_input_node()/2 ; j < data_shape.get_input_node()/2 ; j++, k++ )
@@ -546,7 +589,7 @@ public:
 	}
 	virtual void denormalize( data_manager data )
 	{
-		//•ÏŠ·
+		//å¤‰æ›
 		for( int i = 0 ;i < data_texture.get_data_count() ; i++ )
 		{
 			for( int j = 0 ; j < data_texture.get_input_node() ; j++ )
@@ -564,18 +607,33 @@ public:
 	{															
 		if( input.get_input_node() != output.get_input_node() )
 		{
-			std::cout << "“ü—ÍŸŒ³”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 		
 		if( input.get_data_count() != output.get_data_count() )
 		{
-			std::cout << "ƒf[ƒ^”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 
 		return ::get_mse( input.get_input_data() , output.get_input_data() , input.get_data_count() , input.get_input_node() );	
 	}
 
-	//ƒtƒHƒ[ƒhŒã‚Ìƒf[ƒ^Œ³‚Ìƒf[ƒ^‚©‚çMSE‚ÌZo‚Æ•\¦‚ğs‚¤
+	virtual std::vector<float> get_mse_each(data_manager &input, data_manager &output) 
+	{
+		if (input.get_input_node() != output.get_input_node())
+		{
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		if (input.get_data_count() != output.get_data_count())
+		{
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		return ::get_mse_each(input.get_input_data(), output.get_input_data(), input.get_data_count(), input.get_input_node());
+	}
+
+	//ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰å¾Œã®ãƒ‡ãƒ¼ã‚¿å…ƒã®ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰MSEã®ç®—å‡ºã¨è¡¨ç¤ºã‚’è¡Œã†
 	virtual std::string show_mse(data_manager &input, data_manager &output)
 	{
 		char c[256];
@@ -587,6 +645,28 @@ public:
 #endif
 
 		return c;
+	}
+
+	//ãƒ•ã‚©ãƒ¯ãƒ¼ãƒ‰å¾Œã®ãƒ‡ãƒ¼ã‚¿å…ƒã®ãƒ‡ãƒ¼ã‚¿ã‹ã‚‰MSEã®ç®—å‡ºã¨è¡¨ç¤ºã‚’è¡Œã†
+	virtual std::vector<std::string> show_mse_each(data_manager &input, data_manager &output )
+	{
+
+		std::vector<float> value = get_mse_each(input, output);
+		std::vector<std::string> mse_texts;
+
+		char c[256];
+
+		for (int i = 0; i < value.size(); i++)
+		{
+#ifdef _WIN32
+			sprintf_s(c, "%f", value.at(i) );
+#else
+			sprintf(c, "%f", value.at(i) );
+#endif
+			mse_texts.push_back(c);
+		}
+
+		return mse_texts;
 	}
 };
 
@@ -610,12 +690,12 @@ public:
 	{
 		if( input.get_input_node() != output.get_input_node() )
 		{
-			std::cout << "“ü—ÍŸŒ³”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 		
 		if( input.get_data_count() != output.get_data_count() )
 		{
-			std::cout << "ƒf[ƒ^”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 
 		data_manager data_o = output.copy();
@@ -630,6 +710,145 @@ public:
 
 		return mse;
 	}
+
+	virtual std::vector<float> get_mse_each(data_manager &input, data_manager &output)
+	{
+		if (input.get_input_node() != output.get_input_node())
+		{
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		if (input.get_data_count() != output.get_data_count())
+		{
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		data_manager data_o = output.copy();
+
+		data_o.denormalize(1, np);
+
+		pparameter->denormalize(data_o);
+
+		std::vector<float> mse = ::get_mse_each(pparameter->get_data().get_input_data(), data_o.get_input_data(), data_o.get_data_count(), data_o.get_input_node());
+
+		data_o.release();
+
+		return mse;
+	}
+
+};
+
+class tester_procrutes_sep : public tester
+{
+protected:
+	procrustes_parameter *pparameterS;
+	procrustes_parameter *pparameterT;
+	normal_param np;
+	int m_sep_count;
+public:
+	tester_procrutes_sep(procrustes_parameter *_pparameterS, procrustes_parameter *_pparameterT,int sep_count, normal_param _np)
+		: pparameterS(_pparameterS)
+		, pparameterT(_pparameterT)
+		, m_sep_count(sep_count)
+		, np(_np)
+	{
+	}
+	virtual ~tester_procrutes_sep()
+	{
+		delete pparameterS;
+		delete pparameterT;
+	}
+
+	virtual std::string show_mse(data_manager &input, data_manager &output)
+	{
+		if (input.get_input_node() != output.get_input_node())
+		{
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		if (input.get_data_count() != output.get_data_count())
+		{
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		data_manager data_o = output.copy();
+
+		data_o.denormalize(1, np);
+
+		data_manager shape_data;
+		data_manager texture_data;
+
+		data_o.split(m_sep_count, shape_data, texture_data);
+
+		pparameterS->denormalize(shape_data);
+		pparameterT->denormalize(texture_data);
+
+		float mse_shape = ::get_mse(pparameterS->get_data().get_input_data(), shape_data.get_input_data(), shape_data.get_data_count(), shape_data.get_input_node());
+		float mse_texture = ::get_mse(pparameterT->get_data().get_input_data(), texture_data.get_input_data(), texture_data.get_data_count(), texture_data.get_input_node());
+
+		data_o.release();
+		shape_data.release();
+		texture_data.release();
+
+		char c[256];
+
+#ifdef _WIN32
+		sprintf_s(c, "%lf %lf", mse_shape, mse_texture);
+#else
+		sprintf(c, "%lf %lf", mse_shape, mse_texture);
+#endif
+
+		return c;
+	}
+
+	virtual std::vector<std::string> show_mse_each(data_manager &input, data_manager &output)
+	{
+		if (input.get_input_node() != output.get_input_node())
+		{
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		if (input.get_data_count() != output.get_data_count())
+		{
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		data_manager data_o = output.copy();
+
+		data_o.denormalize(1, np);
+
+		data_manager shape_data;
+		data_manager texture_data;
+
+		data_o.split(m_sep_count, shape_data, texture_data);
+
+		pparameterS->denormalize(shape_data);
+		pparameterT->denormalize(texture_data);
+
+		std::vector<float> mse_shape = ::get_mse_each(pparameterS->get_data().get_input_data(), shape_data.get_input_data(), shape_data.get_data_count(), shape_data.get_input_node());
+		std::vector<float> mse_texture = ::get_mse_each(pparameterT->get_data().get_input_data(), texture_data.get_input_data(), texture_data.get_data_count(), texture_data.get_input_node());
+
+		data_o.release();
+		shape_data.release();
+		texture_data.release();
+
+		std::vector<std::string> mse_text;
+
+		char c[256];
+
+		for (int i = 0; i < mse_shape.size(); i++)
+		{
+#ifdef _WIN32
+			sprintf_s(c, "%lf %lf", mse_shape.at(i), mse_texture.at(i));
+#else
+			sprintf(c, "%lf %lf", mse_shape.at(i), mse_texture.at(i));
+#endif
+			mse_text.push_back(c);
+		}
+
+		return mse_text;
+	}
+
 
 };
 
@@ -652,29 +871,62 @@ public:
 	{
 		if( input.get_input_node() != output.get_input_node() )
 		{
-			std::cout << "“ü—ÍŸŒ³”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 		
 		if( input.get_data_count() != output.get_data_count() )
 		{
-			std::cout << "ƒf[ƒ^”‚ª³‚µ‚­‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
 		}
 
 		data_manager data = output.copy();
 
-		//0.1-0.9 ‹t³‹K‰»
+		//0.1-0.9 é€†æ­£è¦åŒ–
 		data.denormalize(1,np);
 
-		//PCA‚É‚æ‚é•ÏŠ·
+		//PCAã«ã‚ˆã‚‹å¤‰æ›
 		data_manager pca_data = m_pca_parameter->deconvert( data );
 
-		//ƒvƒƒNƒ‰ƒXƒeƒX•ªÍ‚É‚æ‚é³‹K‰»
+		//ãƒ—ãƒ­ã‚¯ãƒ©ã‚¹ãƒ†ã‚¹åˆ†æã«ã‚ˆã‚‹æ­£è¦åŒ–
 		pparameter->denormalize( pca_data );
 
-		//Œë·‚ÌŒvZ
+		//èª¤å·®ã®è¨ˆç®—
 		float mse = ::get_mse( pca_data.get_input_data() , pparameter->get_data().get_input_data(), pca_data.get_data_count() , pca_data.get_input_node() );
 
-		//‰ğ•ú
+		//è§£æ”¾
+		data.release();
+		pca_data.release();
+
+		return mse;
+	}
+
+	virtual std::vector<float> get_mse_each(data_manager &input, data_manager &output)
+	{
+		if (input.get_input_node() != output.get_input_node())
+		{
+			std::cout << "å…¥åŠ›æ¬¡å…ƒæ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		if (input.get_data_count() != output.get_data_count())
+		{
+			std::cout << "ãƒ‡ãƒ¼ã‚¿æ•°ãŒæ­£ã—ãã‚ã‚Šã¾ã›ã‚“" << std::endl;
+		}
+
+		data_manager data = output.copy();
+
+		//0.1-0.9 é€†æ­£è¦åŒ–
+		data.denormalize(1, np);
+
+		//PCAã«ã‚ˆã‚‹å¤‰æ›
+		data_manager pca_data = m_pca_parameter->deconvert(data);
+
+		//ãƒ—ãƒ­ã‚¯ãƒ©ã‚¹ãƒ†ã‚¹åˆ†æã«ã‚ˆã‚‹æ­£è¦åŒ–
+		pparameter->denormalize(pca_data);
+
+		//èª¤å·®ã®è¨ˆç®—
+		std::vector<float> mse = ::get_mse_each(pca_data.get_input_data(), pparameter->get_data().get_input_data(), pca_data.get_data_count(), pca_data.get_input_node());
+
+		//è§£æ”¾
 		data.release();
 		pca_data.release();
 
