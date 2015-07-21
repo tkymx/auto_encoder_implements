@@ -25,13 +25,13 @@
 
 
 /*!
-* ç©ºç™½(ã‚¹ãƒšãƒ¼ã‚¹ï¼Œã‚¿ãƒ–)ã‚’å‰Šé™¤
-* @param[inout] buf å‡¦ç†æ–‡å­—åˆ—
+* ‹ó”’(ƒXƒy[ƒXCƒ^ƒu)‚ğíœ
+* @param[inout] buf ˆ—•¶š—ñ
 */
 inline std::string DeleteSpace(std::string buf)
 {
 	size_t pos;
-	while ((pos = buf.find_first_of(" ã€€\t")) != std::string::npos){
+	while ((pos = buf.find_first_of(" @\t")) != std::string::npos){
 		buf.erase(pos, 1);
 	}
 
@@ -39,7 +39,7 @@ inline std::string DeleteSpace(std::string buf)
 }
 
 /**
- * ä¹±æ•°ã®ç”Ÿæˆ
+ * —”‚Ì¶¬
  */
 float rand_range( float min , float max )
 {
@@ -66,7 +66,7 @@ T get_stream4( std::ifstream& stream )
 }
 
 /**
- * è§£æ”¾å‡¦ç†
+ * ‰ğ•úˆ—
  */
 void delete_value( float* data )
 {
@@ -74,7 +74,7 @@ void delete_value( float* data )
 }
 
 /**
- * è§£æ”¾å‡¦ç†ï¼ˆäºŒæ¬¡å…ƒï¼‰
+ * ‰ğ•úˆ—i“ñŸŒ³j
  */
 void delete_array( float** data , int first_count )
 {
@@ -86,7 +86,7 @@ void delete_array( float** data , int first_count )
 }
 
 /**
- * é…åˆ—ã®ä½œæˆ
+ * ”z—ñ‚Ìì¬
  */
 float* new_array( int first )
 {
@@ -95,7 +95,7 @@ float* new_array( int first )
 }
 
 /**
- * é…åˆ—ã®ä½œæˆ
+ * ”z—ñ‚Ìì¬
  */
 float** new_array( int first , int second )
 {
@@ -108,7 +108,7 @@ float** new_array( int first , int second )
 }
 
 /**
- * 	é…åˆ—ã®è¡¨ç¤º(äºŒæ¬¡å…ƒ)
+ * 	”z—ñ‚Ì•\¦(“ñŸŒ³)
  */
 void show_array( float** data , int first , int second , std::string name )
 {
@@ -125,7 +125,7 @@ void show_array( float** data , int first , int second , std::string name )
 }
 
 /**
- * 	é…åˆ—ã®è¡¨ç¤º
+ * 	”z—ñ‚Ì•\¦
  */
 void show_array( float* data , int count , std::string name )
 {
@@ -186,20 +186,138 @@ inline void  noise_normal( float** data , int data_count , int node , float p )
 	}
 }
 
+/*
+*	ƒRƒXƒgŠÖ”
+*/
+class active_function
+{
+public:
+	typedef std::vector<active_function*> array;
+public:
+	virtual inline float func(float x) = 0;
+	virtual inline float delta(float x) = 0;
+	virtual inline std::string get_function_info() = 0;
+};
 
 /**
  * 	sigmoid
- * 	ã‚·ã‚°ãƒ¢ã‚¤ãƒ‰é–¢æ•°
+ * 	ƒVƒOƒ‚ƒCƒhŠÖ”
  */
-float sigmoid( float value )
+class sigmoid_function : public active_function
 {
-	return static_cast<float>( 1.0 / ( 1.0 + exp(-value) ) );
+public:
+	virtual inline float func(float x)
+	{
+		return static_cast<float>(1.0 / (1.0 + exp(-x)));
+	}
+	virtual inline float delta(float x)
+	{
+		return x * (1 - x);
+	}
+	virtual inline std::string get_function_info()
+	{
+		return name();
+	}
+	static std::string name()
+	{
+		return "sigmoid";
+	}
+};
+
+/**
+* 	relu
+* 	ƒŠƒNƒeƒBƒtƒ@ƒCƒh@ƒŠƒjƒAƒ†ƒjƒbƒg
+*	f(x) = max( 0,x )
+*/
+class relu_function : public active_function
+{
+public:
+	virtual inline float func(float x)
+	{
+		return (x < 0) ? 0.0f : x;
+	}
+	virtual inline float delta(float x)
+	{
+		return (x < 0) ? 0.0f : 1.0f;
+	}
+	virtual inline std::string get_function_info()
+	{
+		return name();
+	}
+	static std::string name()
+	{
+		return "relu";
+	}
+};
+
+
+/**
+* 	linear
+* 	üŒ`Œ‹‡
+*	f(x) = x
+*/
+class linear_function : public active_function
+{
+public:
+	virtual inline float func(float x)
+	{
+		return  x;
+	}
+	virtual inline float delta(float x)
+	{
+		return 1.0f;
+	}
+	virtual inline std::string get_function_info()
+	{
+		return name();
+	}
+	static std::string name()
+	{
+		return "linear";
+	}
+};
+
+/**
+* 	Šˆ«‰»ŠÖ”‚Ìæ“¾
+*/
+active_function* get_active_function(std::map<std::string, std::string> pair ,int layer )
+{
+	std::string name[] =
+	{
+		"active_function_12",
+		"active_function_23",
+		"active_function_34",
+		"active_function_45"
+	};
+
+	if (pair.find(name[layer]) != pair.end())
+	{
+		if (pair[name[layer]] == sigmoid_function::name())
+		{
+			return new sigmoid_function();
+		}
+		else if (pair[name[layer]] == relu_function::name())
+		{
+			return new relu_function();
+		}
+		else if (pair[name[layer]] == linear_function::name())
+		{
+			return new linear_function();
+		}
+		else
+		{
+			std::cout << "[error]" << pair[name[layer]] << "‚Í‚ ‚è‚Ü‚¹‚ñ" << std::endl;
+		}
+	}
+
+	return NULL;
 }
+
 
 /**
  *	foward
- *	ãƒ‹ãƒ¥ãƒ¼ãƒ©ãƒ«ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã®ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰ã‚’è¡Œã†
- *	weight : [éš ã‚Œå±¤ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹][å…¥åŠ›å±¤ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹+1]
+ *	ƒjƒ…[ƒ‰ƒ‹ƒlƒbƒgƒ[ƒN‚ÌƒGƒ“ƒR[ƒh‚ğs‚¤
+ *	weight : [‰B‚ê‘w‚ÌƒCƒ“ƒfƒbƒNƒX][“ü—Í‘w‚ÌƒCƒ“ƒfƒbƒNƒX+1]
  */
 void fowarded( float* input ,float* output , float** weight , int input_node , int output_node , bool isSingle = false )
 {
@@ -234,7 +352,7 @@ void fowarded( float* input ,float* output , float** weight , int input_node , i
 		}
 	}
 }
-void foward( float* input ,float* output , float** weight , int input_node , int output_node , bool isSingle = false )
+void foward( active_function* activef ,  float* input ,float* output , float** weight , int input_node , int output_node , bool isSingle = false )
 {
 	fowarded( input , output , weight , input_node , output_node , isSingle );
 
@@ -245,13 +363,13 @@ void foward( float* input ,float* output , float** weight , int input_node , int
 	#endif
 	for( i = 0; i < output_node ; i++ )
 	{
-		output[i] =   sigmoid( output[i] );
+		output[i] =  activef->func( output[i] );
 	}
 }
 
 /**
- *	vb å‡ºåŠ›å´ã®ãƒã‚¤ã‚¢ã‚¹ã®å­¦ç¿’
- *	ã‚¯ãƒ­ã‚¹ã‚¨ãƒ³ãƒˆãƒ­ãƒ”ãƒ¼ã®ãƒãƒƒã‚¯ãƒ—ãƒ­ãƒ‘ã‚²ãƒ¼ã‚·ãƒ§ãƒ³ã‚’ã™ã‚‹
+ *	vb o—Í‘¤‚ÌƒoƒCƒAƒX‚ÌŠwK
+ *	ƒNƒƒXƒGƒ“ƒgƒƒs[‚ÌƒoƒbƒNƒvƒƒpƒQ[ƒVƒ‡ƒ“‚ğ‚·‚é
  */
 void backpropagate_vb( 
 		float* input , float* output , 
@@ -287,7 +405,7 @@ void backpropagate_vb(
 
 
 /**
- * 	hb éš ã‚Œå±¤å´ã®ãƒã‚¤ã‚¢ã‚¹ã®å­¦ç¿’
+ * 	hb ‰B‚ê‘w‘¤‚ÌƒoƒCƒAƒX‚ÌŠwK
  */
 void backpropagate_hb(
 		float* middle , 
@@ -338,7 +456,7 @@ void backpropagate_hb(
 }
 
 /**
- * 	wã®å­¦ç¿’ï¼ˆw12ã®ã¿ï¼‰
+ * 	w‚ÌŠwKiw12‚Ì‚İj
  */
 void backpropagate_w( 
 		float* input , float* middle , 
@@ -388,7 +506,7 @@ void backpropagate_w(
 }
 
 /**
- * ã‚³ãƒ”ãƒ¼é–¢é€£ã®çµ±åˆ
+ * ƒRƒs[ŠÖ˜A‚Ì“‡
  */
 
 static clock_t copy_weight_time = 0;
@@ -433,7 +551,7 @@ void update_weight(
 		{
 			for( j=0;j<input_node;j++ )
 			{
-				//weight23_store[j][i] = weight12_store[i][j];	//é«˜é€ŸåŒ–ã®ãŸã‚ã«æ¶ˆã—ãŸ
+				//weight23_store[j][i] = weight12_store[i][j];	//‚‘¬‰»‚Ì‚½‚ß‚ÉÁ‚µ‚½
 				weight12[i][j] = weight12_store[i][j];
 			}
 		}
@@ -520,7 +638,7 @@ static clock_t w_time = 0;
 static clock_t copy_time = 0;
 
 /**
- * 	å…¨ä½“ã®å­¦ç¿’
+ * 	‘S‘Ì‚ÌŠwK
  */
 inline void backpropagate_cross_entropy( 
 		float* input , float* middle , float* output , 
@@ -597,6 +715,7 @@ void copy_array( float** src , float** dst , int first, int second )
 }
 
 inline void backpropagate_mse_last( 
+		active_function* activef,
 		float* input , float* middle , float* output , 
 		float** w23 , float** w23_store ,float** w23_d, 
 		float learning_rate , float lambda , float momentum , 
@@ -606,7 +725,7 @@ inline void backpropagate_mse_last(
 	int i,j;
 	float value;
 	
-	//3å±¤ç›®
+	//3‘w–Ú
 	//
 	#ifdef _OPENMP
 		#pragma omp parallel for private(i,value)
@@ -615,7 +734,7 @@ inline void backpropagate_mse_last(
 	{
 		value = (input[j] - output[j]); //MSE
 
-		ppde23[j] = value * output[j] * (1 - output[j]);
+		ppde23[j] = value *  activef->delta( output[j] );
 
 		for (i = 0; i < middle_node; i++)
 		{
@@ -630,6 +749,7 @@ inline void backpropagate_mse_last(
 
 
 inline void backpropagate_mse_continue( 
+		active_function * activef,
 		float* input , float* middle , 
 		float** w12 , float** w23 , float** w12_store , float** w12_d , 
 		float learning_rate , float lambda , float momentum , 
@@ -639,14 +759,14 @@ inline void backpropagate_mse_continue(
 	int i,j,k;
 	float value;
 
-	//2å±¤ç›®
+	//2‘w–Ú
 	
 	#ifdef _OPENMP
 		#pragma omp parallel for private(i,k,value)
 	#endif
 	for (j = 0; j < middle_node; j++)
 	{
-		ppde12[j] = middle[j] * (1 - middle[j]);
+		ppde12[j] = activef->delta( middle[j] );
 
 		value = 0;
 
@@ -669,6 +789,7 @@ inline void backpropagate_mse_continue(
 }
 
 inline void backpropagate_mse( 
+		active_function *activef12, active_function *activef23,
 		float* input , float* middle , float* output , 
 		float** w12 , float** w23 , float** w12_store , float** w23_store , float** w12_d ,float** w23_d, 
 		float learning_rate , float lambda , float momentum , 
@@ -677,6 +798,7 @@ inline void backpropagate_mse(
 {
 	
 	backpropagate_mse_last( 
+		activef23 ,
 		input , middle , output , 
 		w23 , w23_store ,w23_d, 
 		learning_rate , lambda , momentum , 
@@ -684,6 +806,7 @@ inline void backpropagate_mse(
 		input_node, middle_node );
 
 	backpropagate_mse_continue( 
+		activef12,
 		input , middle , 
 		w12 , w23 , w12_store , w12_d , 
 		learning_rate , lambda , momentum , 
@@ -697,6 +820,7 @@ inline void backpropagate_mse(
 
 
 inline void backpropagate_mse_5( 
+		active_function *activef12, active_function *activef23, active_function *activef34, active_function *activef45,
 		float* input , float* middle2 , float* middle3 ,float* middle4  , float* output , 
 		float** w12 , float** w23 , float** w34 , float** w45,
 	       	float** w12_store , float** w23_store , float** w34_store , float** w45_store,
@@ -707,6 +831,7 @@ inline void backpropagate_mse_5(
 {
 	//45
 	backpropagate_mse_last( 
+		activef45,
 		input , middle4 , output , 
 		w45 , w45_store ,w45_d, 
 		learning_rate , lambda , momentum , 
@@ -715,6 +840,7 @@ inline void backpropagate_mse_5(
 
 	//34
 	backpropagate_mse_continue( 
+		activef34,
 		middle3 , middle4 , 
 		w34 , w45 , w34_store , w34_d , 
 		learning_rate , lambda , momentum , 
@@ -722,7 +848,8 @@ inline void backpropagate_mse_5(
 		middle3_node, middle4_node , output_node  );
 
 	//23
-	backpropagate_mse_continue( 
+	backpropagate_mse_continue(
+		activef23,
 		middle2 , middle3 , 
 		w23 , w34 , w23_store , w23_d , 
 		learning_rate , lambda , momentum , 
@@ -731,6 +858,7 @@ inline void backpropagate_mse_5(
 
 	//12
 	backpropagate_mse_continue( 
+		activef12,
 		input , middle2 , 
 		w12 , w23 , w12_store , w12_d , 
 		learning_rate , lambda , momentum , 
@@ -744,7 +872,7 @@ inline void backpropagate_mse_5(
 }
 
 /**
- * ãƒ‡ãƒ¼ã‚¿ã®åˆæœŸåŒ–
+ * ƒf[ƒ^‚Ì‰Šú‰»
  */
 void init_data( float* data , int count )
 {
@@ -755,7 +883,7 @@ void init_data( float* data , int count )
 }
 
 /**
- * ãƒ‡ãƒ¼ã‚¿ã®åˆæœŸåŒ–ï¼ˆäºŒæ¬¡å…ƒï¼‰
+ * ƒf[ƒ^‚Ì‰Šú‰»i“ñŸŒ³j
  */
 void init_data( float** data , int first_count , int second_count )
 {
@@ -769,7 +897,7 @@ void init_data( float** data , int first_count , int second_count )
 }
 
 /**
- * weightã®åˆæœŸåŒ–
+ * weight‚Ì‰Šú‰»
  */
 void init_weight_data( float** data , int first_count , int second_count )
 {
@@ -786,7 +914,7 @@ void init_weight_data( float** data , int first_count , int second_count )
 }  
 
 /**
- * MSEã®è¨ˆç®—
+ * MSE‚ÌŒvZ
  */
 float get_mse( float** test , float** answer , int data_count , int node )
 {
@@ -820,8 +948,8 @@ std::vector<float> get_mse_each(float** test, float** answer, int data_count, in
 
 
 /**
- *	å¹³å‡ã‚’è¨ˆç®—ã™ã‚‹ï¼Œ
- *	axis è»¸ã®æ¬¡å…ƒ 0 1 ...
+ *	•½‹Ï‚ğŒvZ‚·‚éC
+ *	axis ²‚ÌŸŒ³ 0 1 ...
  */
 float* create_mean_vector( float** input_data ,int first , int second, int axis  )
 {
@@ -829,7 +957,7 @@ float* create_mean_vector( float** input_data ,int first , int second, int axis 
 
 	if( axis == 0 )
 	{
-		// iè»¸ã‚’ç„¦ç‚¹ã«å¹³å‡ã‚’è¨ˆç®—
+		// i²‚ğÅ“_‚É•½‹Ï‚ğŒvZ
 
 		mean_value = new_array( first );
 		for( int i = 0; i < first ; i++ )
@@ -844,7 +972,7 @@ float* create_mean_vector( float** input_data ,int first , int second, int axis 
 	}
 	else if( axis == 1 )
 	{
-		//jè»¸ã‚’ç„¦ç‚¹ã«å¹³å‡ã‚’è¨ˆç®—
+		//j²‚ğÅ“_‚É•½‹Ï‚ğŒvZ
 
 		mean_value = new_array( second );
 		for( int i = 0; i < second ; i++ )
@@ -862,8 +990,8 @@ float* create_mean_vector( float** input_data ,int first , int second, int axis 
 }
 
 /**
- *	æ¨™æº–åå·®ã‚’è¨ˆç®—ã™ã‚‹ï¼Œ
- *	axis è»¸ã®æ¬¡å…ƒ 0 1 ...
+ *	•W€•Î·‚ğŒvZ‚·‚éC
+ *	axis ²‚ÌŸŒ³ 0 1 ...
  */
 float* create_std_vector( float** input_data ,int first , int second, int axis  )
 {
@@ -904,8 +1032,8 @@ float* create_std_vector( float** input_data ,int first , int second, int axis  
 }
 
 /**
- *	æœ€å¤§å€¤ã‚’æ±‚ã‚ã‚‹
- *	axis è»¸ã®æ¬¡å…ƒ 0 1 ...
+ *	Å‘å’l‚ğ‹‚ß‚é
+ *	axis ²‚ÌŸŒ³ 0 1 ...
  */
 float* create_max_vector( float** input_data ,int first , int second, int axis  )
 {
@@ -941,8 +1069,8 @@ float* create_max_vector( float** input_data ,int first , int second, int axis  
 }
 
 /**
- *	æœ€å°å€¤ã‚’æ±‚ã‚ã‚‹
- *	axis è»¸ã®æ¬¡å…ƒ 0 1 ...
+ *	Å¬’l‚ğ‹‚ß‚é
+ *	axis ²‚ÌŸŒ³ 0 1 ...
  */
 float* create_min_vector( float** input_data ,int first , int second, int axis  )
 {
@@ -980,7 +1108,7 @@ float* create_min_vector( float** input_data ,int first , int second, int axis  
 
 
 /** 
- * æ­£è¦åŒ–ç”¨ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿
+ * ³‹K‰»—p‚Ìƒpƒ‰ƒ[ƒ^
  */
 struct normal_param
 {
@@ -989,6 +1117,7 @@ struct normal_param
 	int length;
 	float *max_vector;
 	float *min_vector;
+	int mode;
 public:
 	bool is_active()
 	{
@@ -997,7 +1126,7 @@ public:
 };
 
 /**
-*ã€€æ­£è¦åŒ–ç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®å‡ºåŠ›
+*@³‹K‰»—pƒpƒ‰ƒ[ƒ^‚Ìo—Í
 */
 void output_normalize_parameter( std::string str , normal_param np )
 {
@@ -1014,9 +1143,9 @@ void output_normalize_parameter( std::string str , normal_param np )
 }
 
 /**
- *ã€€æ­£è¦åŒ–ç”¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®ä½œæˆ
+ *@³‹K‰»—pƒpƒ‰ƒ[ƒ^‚Ìì¬
  */
-normal_param create_normal_param(float** input_data , int data_count , int input_count )
+normal_param create_normal_param(float** input_data , int data_count , int input_count , int mode )
 {
 	normal_param np;
 	np.mean_vector = create_mean_vector( input_data , data_count , input_count , 1 );
@@ -1024,12 +1153,13 @@ normal_param create_normal_param(float** input_data , int data_count , int input
 	np.max_vector = create_max_vector( input_data , data_count , input_count , 1 );
 	np.min_vector = create_min_vector( input_data , data_count , input_count , 1 );
 	np.length = input_count;
+	np.mode = mode;
 
 	return np;
 }
 
 /**
- *ã€€æ­£è¦åŒ–ç”¨ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®è§£æ”¾
+ *@³‹K‰»—p‚Ìƒpƒ‰ƒ[ƒ^‚Ì‰ğ•ú
  */
 void delete_normal_param( normal_param &np )
 {
@@ -1046,18 +1176,22 @@ void delete_normal_param( normal_param &np )
 }
 
 /** 
- *ã€€æ­£è¦åŒ–ã‚’è¡Œã†
- *  mode 0 å¹³å‡ï¼åˆ†æ•£ï¼‘
- *  mode 1 0.1ï½0.9
+ *@³‹K‰»‚ğs‚¤
+ *  mode 0 •½‹Ï‚O•ªU‚P
+ *  mode 1 0.1`0.9
  */
-void normalize( float** input_data , int data_count , int input_count , normal_param &np , int mode = 1)
+
+//#define DISABLE_NORMALIZE
+
+void normalize( float** input_data , int data_count , int input_count , normal_param &np )
 {
+#ifndef DISABLE_NORMALIZE
 	if( !np.is_active() )
 	{
-		std::cout << "normal_paramãŒã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã§ã¯ã‚ã‚Šã¾ã›ã‚“" << std::endl;	
+		std::cout << "normal_param‚ªƒAƒNƒeƒBƒu‚Å‚Í‚ ‚è‚Ü‚¹‚ñ" << std::endl;	
 	}
 
-	if( mode == 0 )
+	if( np.mode == 0 )
 	{
 		for( int i = 0; i < data_count ; i++ )
 		{
@@ -1080,21 +1214,23 @@ void normalize( float** input_data , int data_count , int input_count , normal_p
 			}
 		}
 	}
+#endif
 }
 
 /** 
- *ã€€é€†æ­£è¦åŒ–ã‚’è¡Œã†
- *  mode 0 å¹³å‡ï¼åˆ†æ•£ï¼‘
- *  mode 1 0.1ï½0.9
+ *@‹t³‹K‰»‚ğs‚¤
+ *  mode 0 •½‹Ï‚O•ªU‚P
+ *  mode 1 0.1`0.9
  */
-void denormalize( float** input_data , int data_count , int input_count , normal_param &np , int mode  )
+void denormalize( float** input_data , int data_count , int input_count , normal_param &np )
 {
+#ifndef DISABLE_NORMALIZE
 	if( !np.is_active() )
 	{
-		std::cout << "normal_paramãŒã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã§ã¯ã‚ã‚Šã¾ã›ã‚“" << std::endl;	
+		std::cout << "normal_param‚ªƒAƒNƒeƒBƒu‚Å‚Í‚ ‚è‚Ü‚¹‚ñ" << std::endl;	
 	}
 
-	if( mode==0 )
+	if( np.mode==0 )
 	{
 		for( int i = 0; i < data_count ; i++ )
 		{
@@ -1117,6 +1253,7 @@ void denormalize( float** input_data , int data_count , int input_count , normal
 			}
 		}
 	}
+#endif
 }
 
 void output_weight( float** weight , int first , int second , std::string filename )
@@ -1211,7 +1348,7 @@ void input_weight( float** weight , int first , int second , std::string filenam
 	fin.open( filename.c_str() , std::ios::in | std::ios::binary );
 	if( !fin.is_open() )
 	{
-		std::cout << filename << "ãŒå­˜åœ¨ã—ã¦ã„ã¾ã›ã‚“" << std::endl;
+		std::cout << filename << "‚ª‘¶İ‚µ‚Ä‚¢‚Ü‚¹‚ñ" << std::endl;
 		return;
 	}
 	
@@ -1264,7 +1401,7 @@ void input_bias( float** weight , int first , int second , std::string filename 
 	fin.open( filename.c_str() , std::ios::in | std::ios::binary );
 	if( !fin.is_open() )
 	{
-		std::cout << filename << "ãŒå­˜åœ¨ã—ã¦ã„ã¾ã›ã‚“" << std::endl;
+		std::cout << filename << "‚ª‘¶İ‚µ‚Ä‚¢‚Ü‚¹‚ñ" << std::endl;
 		return;
 	}
 	
@@ -1288,7 +1425,7 @@ void mul_matrix( float** in , int ifirst , int isecond , float** mat , int mfirs
 {
 	if( isecond != mfirst )
 	{
-		std::cout << "mul:æ¬¡å…ƒæ•°ãŒä¸€è‡´ã—ã¾ã›ã‚“" << isecond << " " << mfirst << std::endl;
+		std::cout << "mul:ŸŒ³”‚ªˆê’v‚µ‚Ü‚¹‚ñ" << isecond << " " << mfirst << std::endl;
 	}
 
 	int i,j,k;
@@ -1310,12 +1447,12 @@ void mul_matrix( float** in , int ifirst , int isecond , float** mat , int mfirs
 
 }
 
-//æ°´å¹³æ–¹å‘ã«è¡Œåˆ—ã¨ãƒ™ã‚¯ãƒˆãƒ«ã®å¼•ãç®—ã‚’ã™ã‚‹
+//…•½•ûŒü‚És—ñ‚ÆƒxƒNƒgƒ‹‚Ìˆø‚«Z‚ğ‚·‚é
 void minus_horizontal( float** inout , int ifirst , int isecond , float* vec , int mfirst )
 {
 	if( ifirst != mfirst )
 	{
-		std::cout << "minus:æ¬¡å…ƒæ•°ãŒä¸€è‡´ã—ã¾ã›ã‚“" << ifirst << " " << mfirst << std::endl;
+		std::cout << "minus:ŸŒ³”‚ªˆê’v‚µ‚Ü‚¹‚ñ" << ifirst << " " << mfirst << std::endl;
 		exit(1);
 	}
 
@@ -1328,12 +1465,12 @@ void minus_horizontal( float** inout , int ifirst , int isecond , float* vec , i
 	}
 }
 
-//æ°´å¹³æ–¹å‘ã«è¡Œåˆ—ã¨ãƒ™ã‚¯ãƒˆãƒ«ã®è¶³ã—ç®—ã‚’ã™ã‚‹
+//…•½•ûŒü‚És—ñ‚ÆƒxƒNƒgƒ‹‚Ì‘«‚µZ‚ğ‚·‚é
 void plus_horizontal( float** inout , int ifirst , int isecond , float* vec , int mfirst )
 {
 	if( ifirst != mfirst )
 	{
-		std::cout << "plus:æ¬¡å…ƒæ•°ãŒä¸€è‡´ã—ã¾ã›ã‚“" << ifirst << " " << mfirst << std::endl;
+		std::cout << "plus:ŸŒ³”‚ªˆê’v‚µ‚Ü‚¹‚ñ" << ifirst << " " << mfirst << std::endl;
 		exit(1);
 	}
 
@@ -1347,7 +1484,7 @@ void plus_horizontal( float** inout , int ifirst , int isecond , float* vec , in
 }
 
 
-//è»¢åœ°ã—ã¦ã„ã‚Œã‚‹
+//“]’n‚µ‚Ä‚¢‚ê‚é
 void t_matrix( float** in , int ifirst , int isecond , float** out )
 {
 	FORI( ifirst )

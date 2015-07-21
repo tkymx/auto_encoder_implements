@@ -37,21 +37,21 @@ public:
 	{
 		if( argc < 15 )
 		{
-			std::cout << "AutoEncoderã®å­¦ç¿’ãŒã§ãã¾ã™" << std::endl;
-			std::cout << "ï¼»å¼•æ•°ï¼‘ï¼½å­¦ç¿’ç‡" << std::endl;
-			std::cout << "ï¼»å¼•æ•°ï¼’ï¼½æ­£å‰‡ä¿‚æ•°" << std::endl;
-			std::cout << "ï¼»å¼•æ•°ï¼“ï¼½ãƒ¢ãƒ¼ãƒ¡ãƒ³ã‚¿ãƒ " << std::endl;
-			std::cout << "ï¼»å¼•æ•°ï¼”ï¼½å­¦ç¿’å›æ•°" << std::endl;
-			std::cout << "ï¼»å¼•æ•°ï¼•ï¼½ç¬¬ä¸€éš ã‚Œå±¤ã®ãƒãƒ¼ãƒ‰æ•°" << std::endl;
-			std::cout << "ï¼»å¼•æ•°ï¼–ï¼½ç¬¬äºŒéš ã‚Œå±¤ã®ãƒãƒ¼ãƒ‰æ•°" << std::endl;
-			std::cout << " [å¼•æ•°ï¼—ï¼½å­¦ç¿’ãƒ•ã‚¡ã‚¤ãƒ«ã®ãƒ•ã‚©ãƒ«ãƒ€" << std::endl;
-			std::cout << " [å¼•æ•°ï¼˜ï¼½å­¦ç¿’é‡ã¿ã®ä¿å­˜èª­ã¿è¾¼ã¿å ´æ‰€(12å±¤)" << std::endl;
-			std::cout << " [å¼•æ•°ï¼™ï¼½å­¦ç¿’é‡ã¿ã®ä¿å­˜èª­ã¿è¾¼ã¿å ´æ‰€(23å±¤)" << std::endl;
-			std::cout << "ï¼»å¼•æ•°ï¼‘ï¼ï¼½å­¦ç¿’é‡ã¿ã®ä¿å­˜èª­ã¿è¾¼ã¿å ´æ‰€(å…¨å±¤)" << std::endl;
-			std::cout << "ï¼»å¼•æ•°ï¼‘ï¼‘ï¼½option å­¦ç¿’ã®æ–¹æ³•" << std::endl;
-			std::cout << "ï¼»å¼•æ•°ï¼‘ï¼’ï¼½option å­¦ç¿’ã®ä¿‚æ•°" << std::endl;
-			std::cout << " [å¼•æ•°ï¼‘ï¼“ï¼½å­¦ç¿’ã™ã‚‹ç¨®é¡ shape texture aam" << std::endl;
-			std::cout << " [å¼•æ•°ï¼‘ï¼”ï¼½å­¦ç¿’è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«" << std::endl;
+			std::cout << "AutoEncoder‚ÌŠwK‚ª‚Å‚«‚Ü‚·" << std::endl;
+			std::cout << "mˆø”‚PnŠwK—¦" << std::endl;
+			std::cout << "mˆø”‚Qn³‘¥ŒW”" << std::endl;
+			std::cout << "mˆø”‚Rnƒ‚[ƒƒ“ƒ^ƒ€" << std::endl;
+			std::cout << "mˆø”‚SnŠwK‰ñ”" << std::endl;
+			std::cout << "mˆø”‚Tn‘æˆê‰B‚ê‘w‚Ìƒm[ƒh”" << std::endl;
+			std::cout << "mˆø”‚Un‘æ“ñ‰B‚ê‘w‚Ìƒm[ƒh”" << std::endl;
+			std::cout << " [ˆø”‚VnŠwKƒtƒ@ƒCƒ‹‚ÌƒtƒHƒ‹ƒ_" << std::endl;
+			std::cout << " [ˆø”‚WnŠwKd‚İ‚Ì•Û‘¶“Ç‚İ‚İêŠ(12‘w)" << std::endl;
+			std::cout << " [ˆø”‚XnŠwKd‚İ‚Ì•Û‘¶“Ç‚İ‚İêŠ(23‘w)" << std::endl;
+			std::cout << "mˆø”‚P‚OnŠwKd‚İ‚Ì•Û‘¶“Ç‚İ‚İêŠ(‘S‘w)" << std::endl;
+			std::cout << "mˆø”‚P‚Pnoption ŠwK‚Ì•û–@" << std::endl;
+			std::cout << "mˆø”‚P‚Qnoption ŠwK‚ÌŒW”" << std::endl;
+			std::cout << " [ˆø”‚P‚RnŠwK‚·‚éí—Ş shape texture aam" << std::endl;
+			std::cout << " [ˆø”‚P‚SnŠwKİ’èƒtƒ@ƒCƒ‹" << std::endl;
 			exit(1);
 		}
 
@@ -72,17 +72,17 @@ public:
 
 		learn_map = get_learn_dat( argv[14] );
 
-		std::cout << "AutoEncoderã®å­¦ç¿’é–‹å§‹" << std::endl;
-		std::cout << "å­¦ç¿’ç‡ï¼š" << learning_rate << std::endl;
-		std::cout << "æ­£å‰‡åŒ–ä¿‚æ•°ï¼š" << lambda << std::endl;
-		std::cout << "ãƒ¢ãƒ¼ãƒ¡ãƒ³ã‚¿ãƒ ï¼š" << momentum << std::endl;
-		std::cout << "å­¦ç¿’å›æ•°ï¼š" << epoch << std::endl; 
-		std::cout << "å­¦ç¿’ãƒ•ã‚©ãƒ«ãƒ€: " << input_dir << std::endl;
-		std::cout << "12éš ã‚Œ"  << layer_12_hidden_node << std::endl;
-		std::cout << "23éš ã‚Œ"  << layer_23_hidden_node << std::endl;
-		std::cout << "å­¦ç¿’æ–¹æ³•" << argv[11] << " " << argv[12] << std::endl;
-		std::cout << "å­¦ç¿’ãƒ‡ãƒ¼ã‚¿æ§‹é€ " << data_structure << std::endl;
-		std::cout << "å­¦ç¿’è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«" << argv[14] << std::endl;
+		std::cout << "AutoEncoder‚ÌŠwKŠJn" << std::endl;
+		std::cout << "ŠwK—¦F" << learning_rate << std::endl;
+		std::cout << "³‘¥‰»ŒW”F" << lambda << std::endl;
+		std::cout << "ƒ‚[ƒƒ“ƒ^ƒ€F" << momentum << std::endl;
+		std::cout << "ŠwK‰ñ”F" << epoch << std::endl; 
+		std::cout << "ŠwKƒtƒHƒ‹ƒ_: " << input_dir << std::endl;
+		std::cout << "12‰B‚ê"  << layer_12_hidden_node << std::endl;
+		std::cout << "23‰B‚ê"  << layer_23_hidden_node << std::endl;
+		std::cout << "ŠwK•û–@" << argv[11] << " " << argv[12] << std::endl;
+		std::cout << "ŠwKƒf[ƒ^\‘¢" << data_structure << std::endl;
+		std::cout << "ŠwKİ’èƒtƒ@ƒCƒ‹" << argv[14] << std::endl;
 
 		start_time = clock();
 
@@ -90,42 +90,41 @@ public:
 
 		if( data_structure == "shape" )
 		{
-			m_loader = new LoadShape();
+			m_loader = new LoadShape(learn_map);
 		}
 		else if( data_structure == "texture" )
 		{
-			m_loader = new LoadTexture();
+			m_loader = new LoadTexture(learn_map);
 		}
 		else if( data_structure == "aam" )
 		{
-			m_loader = new LoadAAM();
+			m_loader = new LoadAAM(learn_map);
 		}
 		else if (data_structure == "shapetexture")
 		{
-			m_loader = new LoadShapeTexture();
+			m_loader = new LoadShapeTexture(learn_map);
 		}
 
-		m_loader->load_data(input_dir, learn_map);
+		m_loader->load_data(input_dir);
 
 		//normalize
 		m_loader->get_input_data()->normalize( 1 );
-		m_loader->get_input_data_test()->normalize(1, m_loader->get_input_data()->get_normal_param());
+		m_loader->get_input_data_test()->normalize( m_loader->get_input_data()->get_normal_param());
 
-		//paramsã®å‡ºåŠ›
+		//params‚Ìo—Í
 		output_normalize_parameter( weight_dir_name+"//params.txt" , m_loader->get_input_data()->get_normal_param());
 		output_normalize_parameter(weight_dir_name23 + "//params.txt", m_loader->get_input_data()->get_normal_param());
 		output_normalize_parameter(weight_dir_nameall + "//params.txt", m_loader->get_input_data()->get_normal_param());
 
-		//1éšå±¤ç›®ã®å­¦ç¿’
+		//1ŠK‘w–Ú‚ÌŠwK
 		m_loader->create_netp1(
 			layer_12_hidden_node,
 			learning_rate,
 			lambda,
 			momentum,
-			info);
-				
+			info);		
 
-		//2éšå±¤ç›®ã®å­¦ç¿’
+		//2ŠK‘w–Ú‚ÌŠwK
 		m_loader->create_netp2(
 			layer_12_hidden_node,
 			layer_23_hidden_node,
@@ -148,24 +147,24 @@ public:
 public:
 	void Load12()
 	{
-		//ä¸€å±¤ç›®ã®ãƒ‡ãƒ¼ã‚¿èª­ã¿è¾¼ã¿
+		//ˆê‘w–Ú‚Ìƒf[ƒ^“Ç‚İ‚İ
 		m_loader->get_netp1()->input_weight( weight_dir_name );
 		m_loader->get_netp1()->show_mse(*m_loader->get_input_data(), *m_loader->get_input_data_test(), "layer12");
 	}
 
 	void Learn12()
 	{
-		//ä¸€å±¤ç›®ã®å­¦ç¿’
+		//ˆê‘w–Ú‚ÌŠwK
 		m_loader->get_netp1()->learn(*m_loader->get_input_data(), *m_loader->get_input_data_test(), epoch);
 		m_loader->get_netp1()->output_weight(weight_dir_name);
 	}
 
 	void Load23()
 	{
-		//ãƒ‹å±¤ç›®ã®ãƒ‡ãƒ¼ã‚¿èª­ã¿è¾¼ã¿
+		//ƒj‘w–Ú‚Ìƒf[ƒ^“Ç‚İ‚İ
 		m_loader->get_netp2()->input_weight(weight_dir_name23);
 
-		//2éšå±¤ç›®ã®å­¦ç¿’ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
+		//2ŠK‘w–Ú‚ÌŠwKƒf[ƒ^‚Ìì¬
 		data_manager middle_data = m_loader->get_netp1()->foward_all_data(*m_loader->get_input_data());
 		data_manager middle_data_test = m_loader->get_netp1()->foward_all_data(*m_loader->get_input_data_test());
 	
@@ -177,11 +176,11 @@ public:
 	}
 	void Learn23()
 	{
-		//2éšå±¤ç›®ã®å­¦ç¿’ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
+		//2ŠK‘w–Ú‚ÌŠwKƒf[ƒ^‚Ìì¬
 		data_manager middle_data = m_loader->get_netp1()->foward_all_data(*m_loader->get_input_data());
 		data_manager middle_data_test = m_loader->get_netp1()->foward_all_data(*m_loader->get_input_data_test());
 
-		//2éšå±¤ç›®ã®å­¦ç¿’
+		//2ŠK‘w–Ú‚ÌŠwK
 		m_loader->get_netp2()->learn( middle_data , middle_data_test , epoch );
 		m_loader->get_netp2()->output_weight(weight_dir_name23);
 
@@ -192,7 +191,7 @@ public:
 	void LoadALL()
 	{
 
-		//ã™ã¹ã¦ã®å±¤ã®å­¦ç¿’
+		//‚·‚×‚Ä‚Ì‘w‚ÌŠwK
 		m_loader->create_netpa(
 			layer_12_hidden_node,
 			layer_23_hidden_node,
@@ -201,7 +200,7 @@ public:
 			momentum,
 			info);
 
-		//å…¨å±¤ã®èª­ã¿è¾¼ã¿
+		//‘S‘w‚Ì“Ç‚İ‚İ
 		m_loader->get_netpa()->input_weight( weight_dir_nameall );
 		m_loader->get_netpa()->show_mse(*m_loader->get_input_data(), *m_loader->get_input_data_test(), "layerAll");
 	}
@@ -223,11 +222,11 @@ public:
 
 	void output_aam_12()
 	{
-		//ä¸­é–“ãƒ‡ãƒ¼ã‚¿ã®æƒ…å ±
+		//’†ŠÔƒf[ƒ^‚Ìî•ñ
 		data_manager middle_data = m_loader->get_netp1()->foward_all_data(*m_loader->get_input_data());
 		data_manager middle_data_test = m_loader->get_netp1()->foward_all_data(*m_loader->get_input_data_test());
 
-		//å‡ºåŠ›(weightã§ã¯ãªã„ãŒãƒ‡ãƒ¼ã‚¿æ•°ã€ãƒãƒ¼ãƒ‰æ•°ã€ãƒ‡ãƒ¼ã‚¿ã®é †ã§æ ¼ç´ã§ãã‚‹ãŸã‚)
+		//o—Í(weight‚Å‚Í‚È‚¢‚ªƒf[ƒ^”Aƒm[ƒh”Aƒf[ƒ^‚Ì‡‚ÅŠi”[‚Å‚«‚é‚½‚ß)
 		output_weight(
 			middle_data.get_input_data(),
 			middle_data.get_data_count(),
@@ -249,11 +248,11 @@ public:
 
 	void output_aam_all()
 	{
-		//ä¸­é–“ãƒ‡ãƒ¼ã‚¿ã®æƒ…å ±
+		//’†ŠÔƒf[ƒ^‚Ìî•ñ
 		data_manager middle_data = m_loader->get_netpa()->foward_all_data(*m_loader->get_input_data());
 		data_manager middle_data_test = m_loader->get_netpa()->foward_all_data(*m_loader->get_input_data_test());
 
-		//å‡ºåŠ›(weightã§ã¯ãªã„ãŒãƒ‡ãƒ¼ã‚¿æ•°ã€ãƒãƒ¼ãƒ‰æ•°ã€ãƒ‡ãƒ¼ã‚¿ã®é †ã§æ ¼ç´ã§ãã‚‹ãŸã‚)
+		//o—Í(weight‚Å‚Í‚È‚¢‚ªƒf[ƒ^”Aƒm[ƒh”Aƒf[ƒ^‚Ì‡‚ÅŠi”[‚Å‚«‚é‚½‚ß)
 		output_weight( 
 				middle_data.get_input_data() , 
 				middle_data.get_data_count() ,

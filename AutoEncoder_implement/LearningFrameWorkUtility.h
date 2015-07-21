@@ -21,13 +21,14 @@ protected:
 	network_parameter3 *netp1;
 	network_parameter3 *netp2;
 	network_parameter5 *netpa;
+	std::map<std::string, std::string> learn_map;
 public:
-	LoadBase()
+	LoadBase(std::map<std::string, std::string> lm)
 		: netp1(NULL)
 		, netp2(NULL)
 		, netpa(NULL)
+		, learn_map(lm)
 	{
-
 	}
 	virtual ~LoadBase()
 	{
@@ -41,7 +42,7 @@ public:
 		if (netpa != 0)delete netpa;
 	}
 public:
-	virtual void load_data(std::string input_dir, std::map<std::string, std::string> learn_map) = 0;
+	virtual void load_data(std::string input_dir) = 0;
 	virtual void create_netp1(int hidden, float lr, float lm, float mo , learn_info *info)
 	{
 		netp1 = new network_parameter3(
@@ -53,6 +54,11 @@ public:
 		netp1->set_network_tool(
 			info->get_network_tool());
 
+		netp1->set_network_active_function( 
+			get_active_function(learn_map, 0),
+			get_active_function(learn_map, 3) );
+
+		netp1->print_network_info();
 	}
 	virtual void create_netp2(int hidden1 , int hidden2, float lr, float lm, float mo, learn_info *info)
 	{
@@ -64,10 +70,16 @@ public:
 
 		netp2->set_network_tool(
 			info->get_network_tool());
+
+		netp2->set_network_active_function(
+			get_active_function(learn_map, 1),
+			get_active_function(learn_map, 2));
+
+		netp2->print_network_info();
 	}
 	virtual void create_netpa(int hidden1, int hidden2, float lr, float lm, float mo, learn_info *info)
 	{
-		//„Åô„Åπ„Å¶„ÅÆÂ±§„ÅÆÂ≠¶Áøí
+		//Ç∑Ç◊ÇƒÇÃëwÇÃäwèK
 		netpa = new network_parameter5(
 			input_data.get_input_node(),
 			hidden1,
@@ -78,19 +90,28 @@ public:
 
 		netpa->set_network_tool(
 			info->get_network_tool());
+
+		netpa->set_network_active_function(
+			get_active_function(learn_map, 0),
+			get_active_function(learn_map, 1),
+			get_active_function(learn_map, 2),
+			get_active_function(learn_map, 3));
+
+		netpa->print_network_info();
+
 	}
 	virtual void create_netpa(float lr, float lm, float mo, learn_info *info)
 	{
 		if (netp1 == NULL)
 		{
-			std::cout << "netpa netp1 „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netpa netp1 Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (netp2 == NULL)
 		{
-			std::cout << "netpa netp2 „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netpa netp2 Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 
-		//„Åô„Åπ„Å¶„ÅÆÂ±§„ÅÆÂ≠¶Áøí
+		//Ç∑Ç◊ÇƒÇÃëwÇÃäwèK
 		netpa = new network_parameter5(
 			netp1, 
 			netp2, 
@@ -98,6 +119,15 @@ public:
 
 		netpa->set_network_tool(
 			info->get_network_tool());
+
+		netpa->set_network_active_function(
+			get_active_function(learn_map, 0),
+			get_active_function(learn_map, 1),
+			get_active_function(learn_map, 2),
+			get_active_function(learn_map, 3));
+
+		netpa->print_network_info();
+
 	}
 public:
 	data_manager* get_input_data()
@@ -130,8 +160,8 @@ protected:
 	procrustes_parameter *test_proc;
 
 public:
-	LoadProc()
-		: LoadBase()
+	LoadProc(std::map<std::string, std::string> lm)
+		: LoadBase(lm)
 		, train_proc(NULL)
 		, test_proc(NULL)
 	{
@@ -139,12 +169,12 @@ public:
 	}
 	virtual ~LoadProc()
 	{
-		//„ÉÜ„Çπ„Çø„Éº	
+		//ÉeÉXÉ^Å[	
 		if (train_proc != 0)delete train_proc;
 		if (test_proc != 0)delete test_proc;
 	}
 public:
-	virtual void load_data(std::string input_dir, std::map<std::string, std::string> learn_map)
+	virtual void load_data(std::string input_dir)
 	{
 		load_proc(input_dir);
 	}
@@ -153,11 +183,11 @@ public:
 	{
 		if (train_proc == NULL)
 		{
-			std::cout << "netp1 train_proc „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp1 train_proc Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (test_proc == NULL)
 		{
-			std::cout << "netp1 test_proc „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp1 test_proc Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 
 		LoadBase::create_netp1(hidden, lr, lm, mo, info);
@@ -171,15 +201,15 @@ public:
 	{
 		if (train_proc == NULL)
 		{
-			std::cout << "netp2 train_proc „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp2 train_proc Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (test_proc == NULL)
 		{
-			std::cout << "netp2 test_proc „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp2 test_proc Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (netp1== NULL)
 		{
-			std::cout << "netp2 netp1 „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp2 netp1 Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 
 		LoadBase::create_netp2(hidden1, hidden2, lr, lm, mo, info);
@@ -192,11 +222,11 @@ public:
 	{
 		if (train_proc == NULL)
 		{
-			std::cout << "netpa train_proc „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netpa train_proc Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (test_proc == NULL)
 		{
-			std::cout << "netpa test_proc „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netpa test_proc Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 
 		LoadBase::create_netpa(hidden1, hidden2, lr, lm, mo, info);
@@ -209,11 +239,11 @@ public:
 	{
 		if (train_proc == NULL)
 		{
-			std::cout << "netpa train_proc „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netpa train_proc Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (test_proc == NULL)
 		{
-			std::cout << "netpa test_proc „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netpa test_proc Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 
 		LoadBase::create_netpa(lr, lm, mo, info);
@@ -227,8 +257,8 @@ public:
 class LoadShape : public LoadProc
 {
 public:
-	LoadShape()
-		: LoadProc()
+	LoadShape(std::map<std::string, std::string> lm)
+		: LoadProc(lm)
 	{
 
 	}
@@ -237,27 +267,27 @@ public:
 
 	}
 public:
-	virtual void load_data(std::string input_dir, std::map<std::string, std::string> learn_map)
+	virtual void load_data(std::string input_dir)
 	{
 		input_data = load_data_shape(input_dir + "//train.dat");
 		if (!input_data.is_open())
 		{
-			std::cout << "train.dat„Åå„ÅÇ„Çä„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "train.datÇ™Ç†ÇËÇ‹ÇπÇÒ" << std::endl;
 			exit(1);
 		}
 
 		input_data_test = load_data_shape(input_dir + "//test.dat");
 		if (!input_data_test.is_open())
 		{
-			std::cout << "test.dat„Åå„ÅÇ„Çä„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "test.datÇ™Ç†ÇËÇ‹ÇπÇÒ" << std::endl;
 			exit(1);
 		}
 
-		LoadProc::load_data(input_dir, learn_map);
+		LoadProc::load_data(input_dir);
 	}
 	virtual void load_proc(std::string input_dir)
 	{
-		//„Éà„É¨„Éº„Éã„É≥„Ç∞ÊÉÖÂ†±
+		//ÉgÉåÅ[ÉjÉìÉOèÓïÒ
 		train_proc = new procrustes_parameter_shape();
 		train_proc->load_data(input_dir + "//train.dat.train.dat");
 
@@ -271,8 +301,8 @@ public:
 class LoadTexture : public LoadProc
 {
 public:
-	LoadTexture()
-		: LoadProc()
+	LoadTexture(std::map<std::string, std::string> lm)
+		: LoadProc(lm)
 	{
 
 	}
@@ -281,27 +311,27 @@ public:
 
 	}
 public:
-	virtual void load_data(std::string input_dir, std::map<std::string, std::string> learn_map)
+	virtual void load_data(std::string input_dir)
 	{
 		input_data = load_data_texture(input_dir + "//train.dat");
 		if (!input_data.is_open())
 		{
-			std::cout << "train.dat„Åå„ÅÇ„Çä„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "train.datÇ™Ç†ÇËÇ‹ÇπÇÒ" << std::endl;
 			exit(1);
 		}
 
 		input_data_test = load_data_texture(input_dir + "//test.dat");
 		if (!input_data_test.is_open())
 		{
-			std::cout << "test.dat„Åå„ÅÇ„Çä„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "test.datÇ™Ç†ÇËÇ‹ÇπÇÒ" << std::endl;
 			exit(1);
 		}
 
-		LoadProc::load_data(input_dir, learn_map);
+		LoadProc::load_data(input_dir);
 	}
 	virtual void load_proc(std::string input_dir)
 	{
-		//„Éà„É¨„Éº„Éã„É≥„Ç∞ÊÉÖÂ†±
+		//ÉgÉåÅ[ÉjÉìÉOèÓïÒ
 		train_proc = new procrustes_parameter_texture();
 		train_proc->load_data(input_dir + "//train.dat.train.dat");
 
@@ -326,8 +356,8 @@ protected:
 	procrustes_parameter_texture *texture_proc_test;
 
 public:
-	LoadAAM()
-		: LoadBase()
+	LoadAAM(std::map<std::string, std::string> lm)
+		: LoadBase(lm)
 		, shape_model(NULL)
 		, texture_model(NULL)
 		, shape_proc_train(NULL)
@@ -354,47 +384,47 @@ public:
 	{
 		if (shape_model == NULL)
 		{
-			std::cout << "netp shape_model „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp shape_model Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (texture_model == NULL)
 		{
-			std::cout << "netp texture_model „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp texture_model Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (shape_proc_train == NULL)
 		{
-			std::cout << "netp shape_proc_train „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp shape_proc_train Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (texture_proc_train == NULL)
 		{
-			std::cout << "netp texture_proc_train „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp texture_proc_train Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (shape_proc_test == NULL)
 		{
-			std::cout << "netp shape_proc_test „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp shape_proc_test Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (texture_proc_train == NULL)
 		{
-			std::cout << "netp shape_proc_train „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp shape_proc_train Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 
 	}
 
 public:
-	virtual void load_data(std::string input_dir, std::map<std::string, std::string> learn_map)
+	virtual void load_data(std::string input_dir)
 	{
 		int shape_count = 0;
 
 		input_data = load_data_aam(input_dir + "//train", shape_count);
 		if (!input_data.is_open())
 		{
-			std::cout << "train.dat„Åå„ÅÇ„Çä„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "train.datÇ™Ç†ÇËÇ‹ÇπÇÒ" << std::endl;
 			exit(1);
 		}
 
 		input_data_test = load_data_aam(input_dir + "//test", shape_count);
 		if (!input_data_test.is_open())
 		{
-			std::cout << "test.dat„Åå„ÅÇ„Çä„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "test.datÇ™Ç†ÇËÇ‹ÇπÇÒ" << std::endl;
 			exit(1);
 		}
 
@@ -444,7 +474,7 @@ public:
 
 		if (netp1 == NULL)
 		{
-			std::cout << "netp2 netp1 „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp2 netp1 Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 
 		LoadBase::create_netp2(hidden1, hidden2, lr, lm, mo, info);
@@ -534,8 +564,8 @@ protected:
 	int m_sep_count;
 
 public:
-	LoadShapeTexture()
-		: LoadBase()
+	LoadShapeTexture(std::map<std::string, std::string> lm)
+		: LoadBase(lm)
 		, shape_proc_train(NULL)
 		, texture_proc_train(NULL)
 		, shape_proc_test(NULL)
@@ -555,37 +585,37 @@ public:
 	{
 		if (shape_proc_train == NULL)
 		{
-			std::cout << "netp shape_proc_train „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp shape_proc_train Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (texture_proc_train == NULL)
 		{
-			std::cout << "netp texture_proc_train „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp texture_proc_train Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (shape_proc_test == NULL)
 		{
-			std::cout << "netp shape_proc_test „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp shape_proc_test Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 		if (texture_proc_train == NULL)
 		{
-			std::cout << "netp shape_proc_train „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp shape_proc_train Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 
 	}
 
 public:
-	virtual void load_data(std::string input_dir, std::map<std::string, std::string> learn_map)
+	virtual void load_data(std::string input_dir)
 	{
 		input_data = load_data_shape_texture(input_dir + "//train.dat" , m_sep_count);
 		if (!input_data.is_open())
 		{
-			std::cout << "train.dat„Åå„ÅÇ„Çä„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "train.datÇ™Ç†ÇËÇ‹ÇπÇÒ" << std::endl;
 			exit(1);
 		}
 
 		input_data_test = load_data_shape_texture(input_dir + "//test.dat" , m_sep_count);
 		if (!input_data_test.is_open())
 		{
-			std::cout << "test.dat„Åå„ÅÇ„Çä„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "test.datÇ™Ç†ÇËÇ‹ÇπÇÒ" << std::endl;
 			exit(1);
 		}
 
@@ -621,7 +651,7 @@ public:
 
 		if (netp1 == NULL)
 		{
-			std::cout << "netp2 netp1 „ÅåË®≠ÁΩÆ„Åï„Çå„Å¶„ÅÑ„Åæ„Åõ„Çì" << std::endl;
+			std::cout << "netp2 netp1 Ç™ê›íuÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ" << std::endl;
 		}
 
 		LoadBase::create_netp2(hidden1, hidden2, lr, lm, mo, info);

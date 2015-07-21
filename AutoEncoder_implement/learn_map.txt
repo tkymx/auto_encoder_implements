@@ -7,3 +7,8 @@ texture_model : texture_model
 texture_model_layer : 5
 texture_model_hidden1 : 1500
 texture_model_hidden2 : 377
+
+active_function_12 : relu
+active_function_23 : relu
+active_function_34 : relu
+active_function_45 : sigmoid
