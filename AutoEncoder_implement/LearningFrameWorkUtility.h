@@ -55,6 +55,7 @@ public:
 			info->get_network_tool());
 
 		netp1->set_network_active_function( 
+			get_cost_function(learn_map),
 			get_active_function(learn_map, 0),
 			get_active_function(learn_map, 3) );
 
@@ -72,6 +73,7 @@ public:
 			info->get_network_tool());
 
 		netp2->set_network_active_function(
+			get_cost_function(learn_map),
 			get_active_function(learn_map, 1),
 			get_active_function(learn_map, 2));
 
@@ -92,6 +94,7 @@ public:
 			info->get_network_tool());
 
 		netpa->set_network_active_function(
+			get_cost_function(learn_map),
 			get_active_function(learn_map, 0),
 			get_active_function(learn_map, 1),
 			get_active_function(learn_map, 2),
@@ -121,6 +124,7 @@ public:
 			info->get_network_tool());
 
 		netpa->set_network_active_function(
+			get_cost_function(learn_map),
 			get_active_function(learn_map, 0),
 			get_active_function(learn_map, 1),
 			get_active_function(learn_map, 2),

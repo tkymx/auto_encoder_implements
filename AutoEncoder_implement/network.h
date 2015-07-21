@@ -590,6 +590,7 @@ public:
 
 	active_function* m_active12;
 	active_function* m_active23;
+	cost_function* m_cost;
 
 	class harving_implements_3 : public harving_implements
 	{
@@ -664,6 +665,7 @@ public:
 		//シグモイド関数のセット
 		m_active12 = new sigmoid_function();
 		m_active23 = new linear_function();
+		m_cost = new mse_function(false);
 
 		//initialize	
 		init_weight_data( weight12 , hidden2_node , input_node);
@@ -702,6 +704,7 @@ public:
 
 		delete m_active12;
 		delete m_active23;
+		delete m_cost;
 	}
 
 public:
@@ -723,18 +726,19 @@ public:
 
 	virtual void backpropagate( float* input_data , float* output_data , bool isSingle = false )
 	{
-		if( m_network_tool->get_learn_mode() == learn_cross_entropy )
+		if( m_cost->is_tide() )
 		{
-			::backpropagate_cross_entropy( 
+			::backpropagate_tide( 
 				input_data , hidden2_data , output_data , 
 				weight12 , weight23 , weight12_store , weight23_store  ,weight12_d , weight23_d ,
 				learning_rate , lambda , momentum ,
 				dlvb , dlhb , input_node , hidden2_node , output_node ,
 			        isSingle );
 		}
-		else if( m_network_tool->get_learn_mode() == learn_mse )
+		else 
 		{
-			::backpropagate_mse( 
+			::backpropagate_untide(
+				m_cost,
 				m_active12 , m_active23 ,
 				input_data , hidden2_data , output_data,
 				weight12 , weight23 , weight12_store , weight23_store , weight12_d , weight23_d,
@@ -768,14 +772,17 @@ public:
 	{
 		std::cout << "layer12 : " << m_active12->get_function_info() << std::endl;
 		std::cout << "layer23 : " << m_active23->get_function_info() << std::endl;
+		std::cout << "cost : " << m_cost->get_function_info() << std::endl;
 	}
 
-	void set_network_active_function( active_function* l12 , active_function* l23 )
+	void set_network_active_function( cost_function* cost, active_function* l12 , active_function* l23 )
 	{
 		if (m_active12 != NULL)delete m_active12;
 		if (m_active23 != NULL)delete m_active23;
+		if (m_cost != NULL)delete m_cost;
 		m_active12 = l12;
 		m_active23 = l23;
+		m_cost = cost;
 	}
 
 	friend class network_parameter5;
@@ -819,6 +826,7 @@ private:
 	active_function* m_active23;
 	active_function* m_active34;
 	active_function* m_active45;
+	cost_function* m_cost;
 
 	class harving_implements_5 : public harving_implements
 	{
@@ -912,10 +920,11 @@ public:
 		ppde34 = new float[hidden4_node];
 		ppde45 = new float[output_node];
 
-		m_active12 = new relu_function();
-		m_active23 = new relu_function();
-		m_active34 = new relu_function();
+		m_active12 = new sigmoid_function();
+		m_active23 = new sigmoid_function();
+		m_active34 = new sigmoid_function();
 		m_active45 = new sigmoid_function();
+		m_cost = new mse_function(false);
 
 		//initialize	
 		init_weight_data( weight12 , hidden2_node , input_node);
@@ -1019,6 +1028,7 @@ public:
 		delete m_active23;
 		delete m_active34;
 		delete m_active45;
+		delete m_cost;
 	}
 
 public:
@@ -1046,7 +1056,8 @@ public:
 	virtual void backpropagate( float* input_data , float* output_data , bool isSingle = false )
 	{
 
-		::backpropagate_mse_5( 
+		::backpropagate_untide_5( 
+				m_cost,
 				m_active12 , m_active23 , m_active34 , m_active45 ,
 				input_data , hidden2_data , hidden3_data , hidden4_data , output_data,
 				weight12 , weight23 , weight34 , weight45 , 
@@ -1097,12 +1108,14 @@ public:
 		std::cout << "layer45 : " << m_active45->get_function_info() << std::endl;
 	}
 
-	void set_network_active_function(active_function* l12, active_function* l23, active_function* l34, active_function* l45)
+	void set_network_active_function(cost_function* cost, active_function* l12, active_function* l23, active_function* l34, active_function* l45)
 	{
+		if (m_cost != NULL)delete m_cost;
 		if (m_active12 != NULL)delete m_active12;
 		if (m_active23 != NULL)delete m_active23;
 		if (m_active34 != NULL)delete m_active34;
 		if (m_active45 != NULL)delete m_active45;
+		m_cost = cost;
 		m_active12 = l12;
 		m_active23 = l23;
 		m_active34 = l34;

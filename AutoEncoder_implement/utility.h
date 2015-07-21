@@ -189,6 +189,117 @@ inline void  noise_normal( float** data , int data_count , int node , float p )
 /*
 *	コスト関数
 */
+class cost_function
+{
+protected:
+	bool m_is_tide_weight;
+public:
+	cost_function(bool tide)
+		: m_is_tide_weight(tide)
+	{
+	}
+public:
+	virtual inline float cost(float output , float answer) = 0;
+	virtual inline std::string get_function_info() = 0;
+public:
+	bool is_tide()
+	{
+		return m_is_tide_weight;
+	}
+};
+
+/*
+*	mse
+*/
+class mse_function : public cost_function
+{
+public:
+	mse_function(bool tide)
+		: cost_function(tide)
+	{
+	}
+public:
+	virtual inline float cost(float output, float answer)
+	{
+		return (output - answer);
+	}
+	virtual inline std::string get_function_info()
+	{
+		return name();
+	}
+	static std::string name()
+	{
+		return "mse";
+	}
+};
+
+/*
+*	cross entropy
+*/
+class cross_entropy_function : public cost_function
+{
+public:
+	cross_entropy_function(bool tide)
+		: cost_function(tide)
+	{
+	}
+public:
+	virtual inline float cost(float output, float answer)
+	{
+		return (answer/output - (1-answer)/(1-output) );
+	}
+	virtual inline std::string get_function_info()
+	{
+		return name();
+	}
+	static std::string name()
+	{
+		return "cross_entropy";
+	}
+};
+
+/**
+* 	活性化関数の取得
+*/
+cost_function* get_cost_function(std::map<std::string, std::string> pair)
+{
+	std::string cost_word = "cost_function";
+	std::string tide_word = "tide_weight";
+
+	bool is_tide = false;
+
+	//tideかどうかの判定
+	if (pair.find(tide_word) != pair.end())
+	{
+		if (pair[tide_word] == "true")
+		{
+			is_tide = true;
+		}
+	}
+
+	//コスト関数の判定
+	if (pair.find(cost_word) != pair.end())
+	{
+		if (pair[cost_word] == mse_function::name())
+		{
+			return new mse_function(is_tide);
+		}
+		else if (pair[cost_word] == cross_entropy_function::name())
+		{
+			return new cross_entropy_function(is_tide);
+		}
+		else
+		{
+			std::cout << "[error]" << pair[cost_word] << "はありません" << std::endl;
+		}
+	}
+
+	return NULL;
+}
+
+/*
+*	活性化関数
+*/
 class active_function
 {
 public:
@@ -640,7 +751,7 @@ static clock_t copy_time = 0;
 /**
  * 	全体の学習
  */
-inline void backpropagate_cross_entropy( 
+inline void backpropagate_tide( 
 		float* input , float* middle , float* output , 
 		float** w12 , float** w23 , float** w12_store , float** w23_store , float** w12_d ,float** w23_d, 
 		float learning_rate , float lambda , float momentum , 
@@ -714,7 +825,8 @@ void copy_array( float** src , float** dst , int first, int second )
 	}
 }
 
-inline void backpropagate_mse_last( 
+inline void backpropagate_untide_last( 
+		cost_function* cost,
 		active_function* activef,
 		float* input , float* middle , float* output , 
 		float** w23 , float** w23_store ,float** w23_d, 
@@ -732,7 +844,10 @@ inline void backpropagate_mse_last(
 	#endif
 	for (j = 0; j < input_node; j++)
 	{
-		value = (input[j] - output[j]); //MSE
+//		value = (input[j] - output[j]); //MSE
+//		value = (input[j] / output[j] - (1 - input[j]) / (1 - output[j])); //cross_entropy
+
+		value = cost->cost(output[j],input[j]); //コスト関数の処理
 
 		ppde23[j] = value *  activef->delta( output[j] );
 
@@ -748,7 +863,7 @@ inline void backpropagate_mse_last(
 }
 
 
-inline void backpropagate_mse_continue( 
+inline void backpropagate_untide_continue( 
 		active_function * activef,
 		float* input , float* middle , 
 		float** w12 , float** w23 , float** w12_store , float** w12_d , 
@@ -788,8 +903,8 @@ inline void backpropagate_mse_continue(
 	}
 }
 
-inline void backpropagate_mse( 
-		active_function *activef12, active_function *activef23,
+inline void backpropagate_untide( 
+		cost_function* cost , active_function *activef12, active_function *activef23,
 		float* input , float* middle , float* output , 
 		float** w12 , float** w23 , float** w12_store , float** w23_store , float** w12_d ,float** w23_d, 
 		float learning_rate , float lambda , float momentum , 
@@ -797,7 +912,8 @@ inline void backpropagate_mse(
 		int input_node, int middle_node , int output_node  )
 {
 	
-	backpropagate_mse_last( 
+	backpropagate_untide_last( 
+		cost,
 		activef23 ,
 		input , middle , output , 
 		w23 , w23_store ,w23_d, 
@@ -805,7 +921,7 @@ inline void backpropagate_mse(
 		ppde23 , 
 		input_node, middle_node );
 
-	backpropagate_mse_continue( 
+	backpropagate_untide_continue( 
 		activef12,
 		input , middle , 
 		w12 , w23 , w12_store , w12_d , 
@@ -819,8 +935,8 @@ inline void backpropagate_mse(
 }
 
 
-inline void backpropagate_mse_5( 
-		active_function *activef12, active_function *activef23, active_function *activef34, active_function *activef45,
+inline void backpropagate_untide_5( 
+		cost_function* cost, active_function *activef12, active_function *activef23, active_function *activef34, active_function *activef45,
 		float* input , float* middle2 , float* middle3 ,float* middle4  , float* output , 
 		float** w12 , float** w23 , float** w34 , float** w45,
 	       	float** w12_store , float** w23_store , float** w34_store , float** w45_store,
@@ -830,7 +946,8 @@ inline void backpropagate_mse_5(
 		int input_node, int middle2_node , int middle3_node , int middle4_node , int output_node  )
 {
 	//45
-	backpropagate_mse_last( 
+	backpropagate_untide_last( 
+		cost,
 		activef45,
 		input , middle4 , output , 
 		w45 , w45_store ,w45_d, 
@@ -839,7 +956,7 @@ inline void backpropagate_mse_5(
 		output_node, middle4_node );
 
 	//34
-	backpropagate_mse_continue( 
+	backpropagate_untide_continue( 
 		activef34,
 		middle3 , middle4 , 
 		w34 , w45 , w34_store , w34_d , 
@@ -848,7 +965,7 @@ inline void backpropagate_mse_5(
 		middle3_node, middle4_node , output_node  );
 
 	//23
-	backpropagate_mse_continue(
+	backpropagate_untide_continue(
 		activef23,
 		middle2 , middle3 , 
 		w23 , w34 , w23_store , w23_d , 
@@ -857,7 +974,7 @@ inline void backpropagate_mse_5(
 		middle2_node, middle3_node  , middle4_node );
 
 	//12
-	backpropagate_mse_continue( 
+	backpropagate_untide_continue( 
 		activef12,
 		input , middle2 , 
 		w12 , w23 , w12_store , w12_d , 
