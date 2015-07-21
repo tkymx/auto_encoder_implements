@@ -221,7 +221,7 @@ public:
 public:
 	virtual inline float cost(float output, float answer)
 	{
-		return (output - answer);
+		return (answer-output);
 	}
 	virtual inline std::string get_function_info()
 	{

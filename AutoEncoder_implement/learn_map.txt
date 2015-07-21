@@ -11,7 +11,7 @@ texture_model_hidden2 : 377
 active_function_12 : sigmoid
 active_function_23 : sigmoid
 active_function_34 : sigmoid
-active_function_45 : sigmoid
+active_function_45 : linear
 
-cost_function : cross_entropy
+cost_function : mse
 tide_weight : false
