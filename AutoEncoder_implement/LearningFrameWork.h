@@ -108,7 +108,7 @@ public:
 		m_loader->load_data(input_dir);
 
 		//normalize
-		m_loader->get_input_data()->normalize( 0 );
+		m_loader->get_input_data()->normalize( 1 );
 		m_loader->get_input_data_test()->normalize( m_loader->get_input_data()->get_normal_param());
 
 		//params‚Ìo—Í

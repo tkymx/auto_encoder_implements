@@ -296,6 +296,9 @@ public:
 
 	harving_implements *m_harving;
 
+	cost_function* m_cost;
+
+
 public:
 
 	network_parameter(int _input_node, float lr, float lam, float mo)
@@ -344,6 +347,7 @@ public:
 #ifdef TIME_TEST
 		clock_t foward_time = 0;
 		clock_t back_time = 0;
+		
 		vb_time = 0;
 		hb_time = 0;
 		w_time = 0;
@@ -352,6 +356,11 @@ public:
 		copy_weight1_time = 0;
 		copy_weight2_time = 0;
 		copy_bias_time = 0;
+
+		untide_copy_time_1 = 0;
+		untide_copy_time_2 = 0;
+		untide_cotinue_time12 = 0;
+		untide_last_time = 0;
 #endif
 
 		data_manager corrupt_data = input_data.copy();
@@ -385,15 +394,27 @@ public:
 
 #ifdef TIME_TEST
 		std::cout << "time foward: " << foward_time << std::endl;
-		std::cout << "time backpropagate_vb: " << vb_time << std::endl;
-		std::cout << "time backpropagate_hb: " << hb_time << std::endl;
-		std::cout << "time backpropagate_w: " << w_time << std::endl;
-		std::cout << "time backpropagate_copy_weight: " << copy_weight_time << std::endl;
-		std::cout << "time backpropagate_copy_weight1: " << copy_weight1_time << std::endl;
-		std::cout << "time backpropagate_copy_weight2: " << copy_weight2_time << std::endl;
-		std::cout << "time backpropagate_copy_bias: " << copy_bias_time << std::endl;
-		std::cout << "time backpropagate_copy: " << copy_time << std::endl;
 		std::cout << "time backpropagate: " << back_time << std::endl;
+
+		if (m_cost->is_tide())
+		{
+			std::cout << "time backpropagate_vb: " << vb_time << std::endl;
+			std::cout << "time backpropagate_hb: " << hb_time << std::endl;
+			std::cout << "time backpropagate_w: " << w_time << std::endl;
+			std::cout << "time backpropagate_copy_weight: " << copy_weight_time << std::endl;
+			std::cout << "time backpropagate_copy_weight1: " << copy_weight1_time << std::endl;
+			std::cout << "time backpropagate_copy_weight2: " << copy_weight2_time << std::endl;
+			std::cout << "time backpropagate_copy_bias: " << copy_bias_time << std::endl;
+			std::cout << "time backpropagate_copy: " << copy_time << std::endl;
+		}
+		else
+		{
+			std::cout << "time untide_last_timeb: " << untide_last_time << std::endl;
+			std::cout << "time untide_continue_time12: " << untide_cotinue_time12 << std::endl;
+			std::cout << "time untide_copy_1: " << untide_copy_time_1 << std::endl;
+			std::cout << "time untide_copy_2: " << untide_copy_time_2 << std::endl;
+
+		}
 		current_time = clock();
 #endif
 
@@ -453,6 +474,11 @@ public:
 			{
 				break;
 			}
+
+			if ( isnan( get_calc_mse(data_test, test_tester) ))
+			{
+				break;
+			}
 		}
 	}
 
@@ -491,7 +517,7 @@ public:
 		{
 			foward( input.get_input_data()[i] , output.get_input_data()[i] , isSingle );
 		}
-		
+
 		std::string mse = _tester->show_mse( input , output );
 
 		output.release();
@@ -590,7 +616,6 @@ public:
 
 	active_function* m_active12;
 	active_function* m_active23;
-	cost_function* m_cost;
 
 	class harving_implements_3 : public harving_implements
 	{
@@ -659,8 +684,8 @@ public:
 		dlhb = new float[hidden2_node];
 		dlvb = new float[output_node];
 
-		ppde12 = new float[hidden2_node];
-		ppde23 = new float[output_node];
+		ppde12 = new float[input_node];
+		ppde23 = new float[hidden2_node];
 
 		//シグモイド関数のセット
 		m_active12 = new sigmoid_function();
@@ -826,7 +851,6 @@ private:
 	active_function* m_active23;
 	active_function* m_active34;
 	active_function* m_active45;
-	cost_function* m_cost;
 
 	class harving_implements_5 : public harving_implements
 	{
@@ -915,10 +939,10 @@ public:
 		weight34_d = new_array( hidden4_node , hidden3_node+1 );
 		weight45_d = new_array( output_node , hidden4_node+1 );
 
-		ppde12 = new float[hidden2_node];
-		ppde23 = new float[hidden3_node];
-		ppde34 = new float[hidden4_node];
-		ppde45 = new float[output_node];
+		ppde12 = new float[input_node];
+		ppde23 = new float[hidden2_node];
+		ppde34 = new float[hidden3_node];
+		ppde45 = new float[hidden4_node];
 
 		m_active12 = new sigmoid_function();
 		m_active23 = new sigmoid_function();

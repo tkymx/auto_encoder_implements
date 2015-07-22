@@ -4,6 +4,7 @@
 #include<fstream> 
 #include<iostream>
 #include<vector>
+#include<map>
 
 #ifndef UTILITY
 #define UTILITY
@@ -420,6 +421,10 @@ active_function* get_active_function(std::map<std::string, std::string> pair ,in
 			std::cout << "[error]" << pair[name[layer]] << "はありません" << std::endl;
 		}
 	}
+	else
+	{
+		std::cout << "[error]" << name[layer] << "がありません" << std::endl;
+	}
 
 	return NULL;
 }
@@ -825,6 +830,7 @@ void copy_array( float** src , float** dst , int first, int second )
 	}
 }
 
+
 inline void backpropagate_untide_last( 
 		cost_function* cost,
 		active_function* activef,
@@ -835,29 +841,39 @@ inline void backpropagate_untide_last(
 		int input_node, int middle_node )
 {
 	int i,j;
-	float value;
+	float de;
 	
 	//3層目
 	//
+
 	#ifdef _OPENMP
-		#pragma omp parallel for private(i,value)
+		#pragma omp parallel for 
+	#endif
+	for (i = 0; i < middle_node; i++)
+	{
+		ppde23[i] = 0;
+	}
+	#ifdef _OPENMP
+		#pragma omp parallel for private(i,de)
 	#endif
 	for (j = 0; j < input_node; j++)
 	{
 //		value = (input[j] - output[j]); //MSE
 //		value = (input[j] / output[j] - (1 - input[j]) / (1 - output[j])); //cross_entropy
 
-		value = cost->cost(output[j],input[j]); //コスト関数の処理
-
-		ppde23[j] = value *  activef->delta( output[j] );
+		de = cost->cost(output[j], input[j]) *  activef->delta(output[j]);
 
 		for (i = 0; i < middle_node; i++)
 		{
-			w23_d[j][i] = learning_rate * ppde23[j] * middle[i] - lambda * w23[j][i] + momentum * w23_d[j][i]; 
+			//誤差の蓄積
+			ppde23[i] += de * w23[j][i];
+
+			//パラメータの更新
+			w23_d[j][i] = learning_rate * de * middle[i] - lambda * w23[j][i] + momentum * w23_d[j][i]; 
 			w23_store[j][i] += w23_d[j][i];
 		}
 
-		w23_d[j][middle_node] = learning_rate * ppde23[j] * 1 - lambda * w23[j][middle_node] + momentum * w23_d[j][middle_node];
+		w23_d[j][middle_node] = learning_rate * de * 1 - lambda * w23[j][middle_node] + momentum * w23_d[j][middle_node];
 		w23_store[j][middle_node] += w23_d[j][middle_node];
 	}
 }
@@ -871,37 +887,45 @@ inline void backpropagate_untide_continue(
 		float* ppde12 , float* ppde23 , 
 		int input_node, int middle_node , int output_node  )
 {
-	int i,j,k;
-	float value;
+	int i,j;
+	float de;
 
 	//2層目
 	
 	#ifdef _OPENMP
-		#pragma omp parallel for private(i,k,value)
+		#pragma omp parallel for 
+	#endif
+	for (i = 0; i < input_node ; i++)
+	{
+		ppde12[i] = 0;
+	}
+
+	#ifdef _OPENMP
+		#pragma omp parallel for private(i,de)
 	#endif
 	for (j = 0; j < middle_node; j++)
 	{
-		ppde12[j] = activef->delta( middle[j] );
-
-		value = 0;
-
-		for (k = 0; k < output_node ; k++)
-		{
-			value += ppde23[k] * w23[k][j];
-		}
-
-		ppde12[j] *= value;
+		de = activef->delta( middle[j] ) * ppde23[j];
 
 		for (i = 0; i < input_node; i++)
 		{
-			w12_d[j][i] = learning_rate * ppde12[j] * input[i] - lambda * w12[j][i] + momentum * w12_d[j][i];
+			//誤差の蓄積
+			ppde12[i] += de * w12[j][i];
+
+			//パラメータの更新
+			w12_d[j][i] = learning_rate * de * input[i] - lambda * w12[j][i] + momentum * w12_d[j][i];
 			w12_store[j][i] += w12_d[j][i];
 		}
 
-		w12_d[j][input_node] = learning_rate * ppde12[j] * 1 - lambda * w12[j][input_node] + momentum * w12_d[j][input_node];
+		w12_d[j][input_node] = learning_rate * de * 1 - lambda * w12[j][input_node] + momentum * w12_d[j][input_node];
 		w12_store[j][input_node] += w12_d[j][input_node];
 	}
 }
+
+static clock_t untide_last_time = 0;
+static clock_t untide_cotinue_time12 = 0;
+static clock_t untide_copy_time_1 = 0;
+static clock_t untide_copy_time_2 = 0;
 
 inline void backpropagate_untide( 
 		cost_function* cost , active_function *activef12, active_function *activef23,
@@ -912,6 +936,11 @@ inline void backpropagate_untide(
 		int input_node, int middle_node , int output_node  )
 {
 	
+#ifdef TIME_TEST
+	clock_t current_time = clock();
+#endif
+
+	//23
 	backpropagate_untide_last( 
 		cost,
 		activef23 ,
@@ -921,6 +950,12 @@ inline void backpropagate_untide(
 		ppde23 , 
 		input_node, middle_node );
 
+#ifdef TIME_TEST
+	untide_last_time += (clock() - current_time);
+	current_time = clock();
+#endif
+
+	//12
 	backpropagate_untide_continue( 
 		activef12,
 		input , middle , 
@@ -929,11 +964,29 @@ inline void backpropagate_untide(
 		ppde12 , ppde23 , 
 		input_node, middle_node , output_node  );
 	
-	
+#ifdef TIME_TEST
+	untide_cotinue_time12 += (clock() - current_time);
+	current_time = clock();
+#endif
+
 	copy_array( w12_store , w12 , middle_node , input_node+1 );
-	copy_array( w23_store , w23 , input_node , middle_node+1 );
+
+#ifdef TIME_TEST
+	untide_copy_time_1 += (clock() - current_time);
+	current_time = clock();
+#endif
+
+	copy_array(w23_store, w23, input_node, middle_node + 1);
+
+#ifdef TIME_TEST
+	untide_copy_time_2 += (clock() - current_time);
+	current_time = clock();
+#endif
+
 }
 
+static clock_t untide_cotinue_time23 = 0;
+static clock_t untide_cotinue_time34 = 0;
 
 inline void backpropagate_untide_5( 
 		cost_function* cost, active_function *activef12, active_function *activef23, active_function *activef34, active_function *activef45,
